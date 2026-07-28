@@ -1,0 +1,13 @@
+.git
+.github
+.idea
+.vscode
+.env
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/framework
+/storage/logs
+Dockerfile
