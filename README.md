@@ -1,4 +1,4 @@
-# 🎓 Academy (Gorge) — Comprehensive Project Documentation
+# 🎓 Academy — Comprehensive Project Documentation
 
 > **Last Updated:** 2026-07-30  
 > **Version:** Laravel 13.x  
