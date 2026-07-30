@@ -1,0 +1,79 @@
+services:
+  # PHP Application Service
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: gorge-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - gorge-network
+
+  # Nginx Web Server Service
+  nginx:
+    image: nginx:alpine
+    container_name: gorge-nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - gorge-network
+
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: gorge-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-gorge_db}
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - gorge-db-data:/var/lib/mysql
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    networks:
+      - gorge-network
+
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: gorge-redis
+    restart: unless-stopped
+    volumes:
+      - gorge-redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - gorge-network
+
+  # Queue Worker Service
+  worker:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: gorge-worker
+    restart: unless-stopped
+    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - redis
+    networks:
+      - gorge-network
+
+networks:
+  gorge-network:
+    driver: bridge
+
+volumes:
+  gorge-db-data:
+    driver: local
+  gorge-redis-data:
+    driver: local
