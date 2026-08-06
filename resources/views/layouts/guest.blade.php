@@ -14,12 +14,9 @@
 
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 h-[100px] px-4 md:px-8 flex items-center justify-between bg-bg-primary/75 backdrop-blur-xl border-b border-glass-border">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-10 rounded-xl bg-gradient-to-br from-gold-light to-gold flex items-center justify-center text-lg font-black text-text-primary shadow-[0_2px_16px_rgba(201,150,58,0.35)] shrink-0">
-                G
-            </div>
-            <a href="/" class="text-xl font-bold bg-gradient-to-br from-gold-light to-gold bg-clip-text text-transparent tracking-wide">
-                Gorge
+        <div class="flex items-center">
+            <a href="/">
+                <img src="{{ asset('images/Logo.png') }}" alt="أكاديمية المكتب الفني" style="height: 85px; width: auto; object-fit: contain;">
             </a>
         </div>
 

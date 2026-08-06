@@ -20,11 +20,10 @@
         
         <!-- Sidebar Header -->
         <div class="h-[100px] flex items-center px-6 border-b border-glass-border shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-light to-gold flex items-center justify-center text-lg font-black text-text-primary shadow-[0_2px_10px_rgba(201,150,58,0.3)]">
-                    G
-                </div>
-                <span class="text-xl font-bold bg-gradient-to-br from-gold-light to-gold bg-clip-text text-transparent">Gorge</span>
+            <div class="flex items-center">
+                <a href="/">
+                    <img src="{{ asset('images/Logo.png') }}" alt="أكاديمية المكتب الفني" style="height: 75px; width: auto; object-fit: contain;">
+                </a>
             </div>
             <!-- Close button on mobile -->
             <button @click="sidebarOpen = false" class="lg:hidden mr-auto text-text-muted hover:text-text-primary transition">
