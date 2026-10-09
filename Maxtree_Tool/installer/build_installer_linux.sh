@@ -74,7 +74,7 @@ bundle = Path('$BUNDLE_DIR')
 dist = Path('$DIST_DIR')
 
 manifest = {
-    'version': '3.0.0',
+    'version': '3.2.0',
     'series_min': '2025',
     'series_max': '2027',
     'files': []
@@ -98,7 +98,7 @@ if [ -f "$WINE_BIN" ] && [ -f "$ISCC_EXE" ]; then
     echo "Compiling Inno Setup Script with Wine..."
     WINEDEBUG=-all "$WINE_BIN" "$ISCC_EXE" "Maxtree_Tool/installer/Maxtree_Setup.iss" "/Odist"
     
-    EXE_OUTPUT="$DIST_DIR/Maxtree_Setup_3.0.0_x64.exe"
+    EXE_OUTPUT="$DIST_DIR/Maxtree_Setup_3.2.0_x64.exe"
     if [ -f "$EXE_OUTPUT" ]; then
         SIZE=$(stat -c%s "$EXE_OUTPUT")
         SHA=$(sha256sum "$EXE_OUTPUT" | awk '{print $1}')

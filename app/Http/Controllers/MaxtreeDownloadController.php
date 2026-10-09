@@ -12,9 +12,9 @@ class MaxtreeDownloadController extends Controller
     /**
      * Constant specifying the current published release version and filename.
      */
-    public const CURRENT_VERSION = '3.0.0';
-    public const RELEASE_FILENAME = 'Maxtree_Setup_3.0.0_x64.exe';
-    public const RELATIVE_STORAGE_PATH = 'maxtree/releases/Maxtree_Setup_3.0.0_x64.exe';
+    public const CURRENT_VERSION = '3.2.0';
+    public const RELEASE_FILENAME = 'Maxtree_Setup_3.2.0_x64.exe';
+    public const RELATIVE_STORAGE_PATH = 'maxtree/releases/Maxtree_Setup_3.2.0_x64.exe';
 
     /**
      * Download the published Maxtree Tool Windows EXE Installer.
