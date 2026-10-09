@@ -771,7 +771,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-sm text-text-secondary border-t border-glass-border pt-6">
                     <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border">
                         <span class="block text-xs text-text-muted mb-1">الإصدار الحالى</span>
-                        <strong class="text-text-primary">v3.3.1</strong>
+                        <strong class="text-text-primary">v{{ \App\Http\Controllers\MaxtreeDownloadController::CURRENT_VERSION }}</strong>
                     </div>
                     <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border">
                         <span class="block text-xs text-text-muted mb-1">نظام التشغيل</span>
