@@ -35,4 +35,5 @@ Maxtree_Tool/Maxtree_Tool/settings/jobs/
 Maxtree_Tool/Maxtree_Tool/settings/ui_validation/
 Maxtree_Tool/Maxtree_Tool/test_*.png
 Maxtree_Tool/Maxtree_Tool/test_*_results.json
+*.zip
 
