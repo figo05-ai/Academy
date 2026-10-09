@@ -2,7 +2,7 @@
 ; Target Host: Autodesk 3ds Max 2025 - 2027 (PySide6)
 
 #define MyAppName "Maxtree Tool"
-#define MyAppVersion "3.2.0"
+#define MyAppVersion "3.3.1"
 #define MyAppPublisher "Academy"
 #define MyAppURL "https://academy.com"
 #define MyAppBundleName "Maxtree.bundle"

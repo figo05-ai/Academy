@@ -1,0 +1,42 @@
+﻿ACADEMY + MAXTREE TOOL — LATEST DISTRIBUTION
+Version 3.3.1 — About tab update
+
+INSTALL
+1. Save your work and close 3ds Max and 3ds Max Batch.
+2. Extract this ZIP to a local folder.
+3. Run Maxtree_Setup_3.3.1_x64.exe.
+4. Select the Max versions to integrate with. Use Browse to locate that
+   version's 3dsmax.exe if automatic detection does not find it.
+5. Start Max and click the Maxtree Tool toolbar button. No script dragging
+   or Desktop launcher is required. Select About to view the new page.
+
+WHAT IS INCLUDED
+The EXE contains the complete plugin, bootstrap, toolbar registration,
+valid empty release catalog, existing academy logo, About page, original
+portrait copy, and local WhatsApp/Facebook SVG icons. These are embedded
+in this single installer; no separate asset download is required.
+No third-party models, maps, material libraries or user libraries are included.
+
+LOCATIONS
+Plugin: %APPDATA%\Autodesk\ApplicationPlugins\Maxtree.bundle
+User libraries/settings: %APPDATA%\Maxtree_Tool\settings
+Remembered sign-in: %LOCALAPPDATA%\Maxtree_Tool\auth (Windows DPAPI protected)
+User settings are separate from application files and preserved on upgrade.
+
+USAGE
+The About tab is available without login. Protected library operations require
+an Academy account with current access. Add your own local libraries inside
+the tool; the installer does not request asset folders.
+
+COMPATIBILITY
+Targets 3ds Max 2021–2027 on Windows; Max 2021 requires Python 3 mode.
+About checks passed in standalone Qt environments supplied by Max 2021
+(Python 3.7/PySide2) and Max 2027 (Python 3.13/PySide6), with responsive
+rendering, link routing and packaged assets verified. The new build has not
+been tested in real Max sessions or installed during the testing pause.
+Max 2022–2026 host/Qt testing remains unperformed. Do not interpret the
+installer version list as verified compatibility for every host version.
+
+INTEGRITY
+SHA256SUMS.txt contains the SHA-256 hash of the installer.
+This archive intentionally contains one installer version only.
