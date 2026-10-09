@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\User\UpdateUserDetailRequest;
+use App\Http\Requests\UserRequests\UpdateUserDetailRequest;
 use App\Http\Requests\UserRequests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -60,6 +60,72 @@ class AdminUserController extends Controller
         return response()->json([
             'success' => 'تم تحديث حالة المستخدم بنجاح!',
             'is_active' => $user->is_active,
+        ]);
+    }
+
+    /**
+     * Get the Maxtree license details for a user.
+     */
+    public function getMaxtreeLicense(User $user): JsonResponse
+    {
+        $license = $user->maxtreeLicense;
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_active' => (bool) $user->is_active,
+            ],
+            'license' => $license ? [
+                'id' => $license->id,
+                'is_active' => (bool) $license->is_active,
+                'expires_at' => $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : null,
+                'notes' => $license->notes,
+                'created_at' => $license->created_at ? $license->created_at->format('Y-m-d H:i') : null,
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Activate, deactivate, or update the Maxtree license for a user.
+     */
+    public function updateMaxtreeLicense(Request $request, User $user): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'is_active' => ['required', 'boolean'],
+            'expires_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'بيانات التحديث غير صالحة.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        $expiresAt = ! empty($validated['expires_at']) ? \Illuminate\Support\Carbon::parse($validated['expires_at']) : null;
+
+        $license = $user->maxtreeLicense()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'is_active' => (bool) $validated['is_active'],
+                'expires_at' => $expiresAt,
+                'notes' => $validated['notes'] ?? null,
+            ]
+        );
+
+        return response()->json([
+            'success' => 'تم تحديث ترخيص Maxtree بنجاح!',
+            'license' => [
+                'id' => $license->id,
+                'is_active' => (bool) $license->is_active,
+                'expires_at' => $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : null,
+                'notes' => $license->notes,
+            ],
         ]);
     }
 

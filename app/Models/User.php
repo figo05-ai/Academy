@@ -7,10 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int $id
@@ -19,6 +21,7 @@ use Illuminate\Notifications\Notifiable;
  * @property bool $is_admin
  * @property bool $is_active
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $courses
+ * @property-read \App\Models\MaxtreeLicense|null $maxtreeLicense
  * @property-read object{is_completed?: bool, status?: string}|null $pivot
  */
 #[Fillable(['name', 'email', 'password', 'is_admin', 'is_active', 'google_id'])]
@@ -26,7 +29,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -51,5 +54,10 @@ class User extends Authenticatable
     public function sessions(): BelongsToMany
     {
         return $this->belongsToMany(Session::class, 'session_user')->withPivot('is_completed')->withTimestamps();
+    }
+
+    public function maxtreeLicense(): HasOne
+    {
+        return $this->hasOne(MaxtreeLicense::class);
     }
 }

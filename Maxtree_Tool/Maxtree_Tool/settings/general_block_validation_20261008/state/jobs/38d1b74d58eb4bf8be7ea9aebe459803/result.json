@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "collection_id": "draft_e5465d8534bd4ef38fb5e1bbc3dc7718",
+  "complete": true,
+  "entries": [
+    {
+      "path": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models\\BareBlock.max",
+      "name": "BareBlock",
+      "label": "BareBlock",
+      "category": "Architecture",
+      "species": "BareBlock",
+      "collection_root": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models",
+      "variants": [
+        {
+          "name": "BareBlock_Object",
+          "object": "BareBlock_Object",
+          "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\BareBlock.png",
+          "matlib": "",
+          "material": ""
+        }
+      ],
+      "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\BareBlock.png",
+      "issues": [
+        "No asset references returned; maps will be checked on insertion."
+      ],
+      "object_names": [
+        "BareBlock_Object"
+      ],
+      "map_matches": [],
+      "preview_candidates": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\BareBlock.png"
+      ],
+      "material_libraries": [],
+      "bytes": 606208,
+      "map_references": [],
+      "object_evidence": "Single clearly named scene object",
+      "renderer_evidence": "Not verified by scan; actual materials validated on insertion"
+    },
+    {
+      "path": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models\\DuplicateBlock.max",
+      "name": "DuplicateBlock",
+      "label": "DuplicateBlock",
+      "category": "Architecture",
+      "species": "DuplicateBlock",
+      "collection_root": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models",
+      "variants": [
+        {
+          "name": "DuplicateBlock_Object",
+          "object": "DuplicateBlock_Object",
+          "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\DuplicateBlock.png",
+          "matlib": "",
+          "material": ""
+        }
+      ],
+      "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\DuplicateBlock.png",
+      "issues": [
+        "ambiguous: E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Shared.png"
+      ],
+      "object_names": [
+        "DuplicateBlock_Object"
+      ],
+      "map_matches": [
+        {
+          "reference": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Shared.png",
+          "candidates": [
+            "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\A\\Shared.png",
+            "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\B\\Shared.png"
+          ],
+          "resolved": "",
+          "status": "ambiguous",
+          "channel": ""
+        }
+      ],
+      "preview_candidates": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\DuplicateBlock.png"
+      ],
+      "material_libraries": [],
+      "bytes": 618496,
+      "map_references": [
+        {
+          "filename": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Shared.png",
+          "type": "bitmap"
+        }
+      ],
+      "object_evidence": "Single clearly named scene object",
+      "renderer_evidence": "Not verified by scan; actual materials validated on insertion"
+    },
+    {
+      "path": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models\\MissingBlock.max",
+      "name": "MissingBlock",
+      "label": "MissingBlock",
+      "category": "Architecture",
+      "species": "MissingBlock",
+      "collection_root": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models",
+      "variants": [
+        {
+          "name": "MissingBlock_Object",
+          "object": "MissingBlock_Object",
+          "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\MissingBlock.png",
+          "matlib": "",
+          "material": ""
+        }
+      ],
+      "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\MissingBlock.png",
+      "issues": [
+        "missing: E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Absent.png"
+      ],
+      "object_names": [
+        "MissingBlock_Object"
+      ],
+      "map_matches": [
+        {
+          "reference": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Absent.png",
+          "candidates": [],
+          "resolved": "",
+          "status": "missing",
+          "channel": ""
+        }
+      ],
+      "preview_candidates": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\MissingBlock.png"
+      ],
+      "material_libraries": [],
+      "bytes": 618496,
+      "map_references": [
+        {
+          "filename": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Absent.png",
+          "type": "bitmap"
+        }
+      ],
+      "object_evidence": "Single clearly named scene object",
+      "renderer_evidence": "Not verified by scan; actual materials validated on insertion"
+    },
+    {
+      "path": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models\\MultiBlock.max",
+      "name": "MultiBlock",
+      "label": "MultiBlock",
+      "category": "Architecture",
+      "species": "MultiBlock",
+      "collection_root": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models",
+      "variants": [],
+      "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\MultiBlock.png",
+      "issues": [
+        "Object review required: select objects or the full block at insertion."
+      ],
+      "object_names": [
+        "Fixture_Group",
+        "Part_A",
+        "Part_B"
+      ],
+      "map_matches": [
+        {
+          "reference": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Paint.png",
+          "candidates": [
+            "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\Paint.png"
+          ],
+          "resolved": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\Paint.png",
+          "status": "resolved",
+          "channel": ""
+        }
+      ],
+      "preview_candidates": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\MultiBlock.png"
+      ],
+      "material_libraries": [],
+      "bytes": 622592,
+      "map_references": [
+        {
+          "filename": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Paint.png",
+          "type": "bitmap"
+        }
+      ],
+      "renderer_evidence": "Not verified by scan; actual materials validated on insertion"
+    },
+    {
+      "path": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models\\SingleBlock.max",
+      "name": "SingleBlock",
+      "label": "SingleBlock",
+      "category": "Architecture",
+      "species": "SingleBlock",
+      "collection_root": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models",
+      "variants": [
+        {
+          "name": "SingleBlock_Object",
+          "object": "SingleBlock_Object",
+          "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\SingleBlock.png",
+          "matlib": "",
+          "material": ""
+        }
+      ],
+      "image": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\SingleBlock.png",
+      "issues": [],
+      "object_names": [
+        "SingleBlock_Object"
+      ],
+      "map_matches": [
+        {
+          "reference": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Paint.png",
+          "candidates": [
+            "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\Paint.png"
+          ],
+          "resolved": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\Paint.png",
+          "status": "resolved",
+          "channel": ""
+        }
+      ],
+      "preview_candidates": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews\\SingleBlock.png"
+      ],
+      "material_libraries": [],
+      "bytes": 618496,
+      "map_references": [
+        {
+          "filename": "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\OriginalLocation\\Paint.png",
+          "type": "bitmap"
+        }
+      ],
+      "object_evidence": "Single clearly named scene object",
+      "renderer_evidence": "Not verified by scan; actual materials validated on insertion"
+    }
+  ],
+  "images": {
+    "paint.png": [
+      "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\Paint.png"
+    ],
+    "shared.png": [
+      "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\A\\Shared.png",
+      "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps\\B\\Shared.png"
+    ]
+  },
+  "indexes": [],
+  "errors": [],
+  "metadata_files": [],
+  "counts": {
+    "models": 5,
+    "preview_files": 5,
+    "map_image_files": 3,
+    "material_libraries": 0
+  }
+}

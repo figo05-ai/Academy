@@ -17,13 +17,15 @@ class AdminUserSeeder extends Seeder
         // أولاً، نتأكد من أن لا يوجد أي مستخدم آخر لديه صلاحيات الأدمن
         User::where('is_admin', true)->update(['is_admin' => false]);
 
-        // الآن، نقوم بإنشاء أو تحديث حساب الأدمن المحدد
+        // Now create or update admin user using environment configuration
+        $adminPassword = env('ADMIN_DEFAULT_PASSWORD', 'SecureAdminPass!' . rand(1000, 9999));
+
         User::updateOrCreate(
-            ['email' => 'gorge@gmail.com'], // البحث عن المستخدم بهذا الإيميل
+            ['email' => env('ADMIN_DEFAULT_EMAIL', 'gorge@gmail.com')],
             [
                 'name' => 'Gorge Admin',
-                'password' => Hash::make('12#qW4568'), // كلمة المرور التي طلبتها
-                'is_admin' => true, // تحديد هذا المستخدم كأدمن
+                'password' => Hash::make($adminPassword),
+                'is_admin' => true,
             ]
         );
     }

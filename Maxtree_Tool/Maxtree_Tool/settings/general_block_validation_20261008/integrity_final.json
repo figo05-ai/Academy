@@ -1,0 +1,26 @@
+{
+  "user_collections.json": {
+    "missing_original_ids": [],
+    "changed_original_ids": [],
+    "added": [
+      {
+        "id": "user_c49978324877449abe810b8b5017ae37",
+        "name": "Maxtree - Plant Models Vol.119",
+        "entries": 0
+      }
+    ]
+  },
+  "asset_libraries.json": {
+    "missing_original_ids": [],
+    "changed_original_ids": [],
+    "added": [
+      {
+        "id": "library_b0455d05501940a9b73277ab4db361cf",
+        "name": "Maxtree - Plant Models Vol.119",
+        "entries": 111
+      }
+    ]
+  },
+  "catalog.json": true,
+  "academy_logo.png": true
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "libraries": [
+    {
+      "id": "library_aaecb4b260a5466ab91793be10825153",
+      "name": "Validation Maxtree Plants",
+      "entries": [],
+      "workflow": "structured",
+      "config": {
+        "id": "draft_59f80737345042b58212a51abc1212bd",
+        "workflow": "structured",
+        "library_type": "maxtree",
+        "renderer": "corona",
+        "folders": {
+          "mixed": [
+            "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67"
+          ],
+          "models": [],
+          "maps": [],
+          "previews": []
+        }
+      },
+      "removed": false
+    }
+  ]
+}

@@ -12,6 +12,8 @@ use App\Models\Project;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\MaxtreeDownloadController;
+
 // Homepage Route
 Route::get('/', function () {
     $projects = Project::latest()->get();
@@ -24,6 +26,9 @@ Route::get('/', function () {
 
     return view('index', compact('setting', 'projects', 'courses', 'userEnrolledCourseIds'));
 });
+
+// Maxtree Tool Installer Public Download Route
+Route::get('/maxtree/download', [MaxtreeDownloadController::class, 'download'])->name('maxtree.download');
 
 // Authentication Routes
 Route::get('/register', function () {
@@ -52,9 +57,11 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
 
     // Admin User Management Routes
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+    Route::get('/admin/users/{user}/maxtree-license', [AdminUserController::class, 'getMaxtreeLicense'])->name('admin.users.maxtree.get');
+    Route::put('/admin/users/{user}/maxtree-license', [AdminUserController::class, 'updateMaxtreeLicense'])->name('admin.users.maxtree.update');
     Route::put('/admin/users/{user}/courses', [AdminUserController::class, 'updateUserCourses'])->name('admin.users.courses.update');
     Route::post('/admin/users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('admin.users.toggle_status');
+    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
 
     // Admin Course Management

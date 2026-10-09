@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "collections": [
+    {
+      "id": "user_d97b1a83f66f491f94b9005982db21de",
+      "name": "مكتبة المكتب الفني",
+      "folders": {
+        "mixed": [],
+        "models": [
+          "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\MT Plants model vol\\MT_PM_V67_Forest_Pack_Mesh_Corona\\MT_PM_V67"
+        ],
+        "previews": [
+          "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\MT Plants model vol\\MT_PM_V67_Forest_Pack_Mesh_Corona\\MT_PM_V67\\thumbnails"
+        ],
+        "maps": [
+          "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps"
+        ]
+      },
+      "renderer": "corona",
+      "reviews": {
+        "e:\\max lib\\maxtree\\mt plants model vol.67\\mt plants model vol.67\\mt plants model vol\\mt_pm_v67_forest_pack_mesh_corona\\mt_pm_v67\\mt_pm_v67_carica_papaya_01_03.max": {
+          "object": "MT_PM_V67_Carica_papaya_01_03",
+          "preview": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\MT Plants model vol\\MT_PM_V67_Forest_Pack_Mesh_Corona\\MT_PM_V67\\thumbnails\\MT_PM_V67_Carica_papaya_01_03.jpg",
+          "maps": {
+            "MT_PM_V67_Carica_papaya_Fruit_02_specular.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_02_specular.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_02_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_02_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_01_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_01_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_03_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_03_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Petiole_01_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Petiole_01_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Petiole_01_albedo_01.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Petiole_01_albedo_01.jpg",
+            "MT_PM_V67_Carica_papaya_Petiole_01_roughness.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Petiole_01_roughness.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_03_specular.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_03_specular.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_01_translucency.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_01_translucency.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_02_roughness.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_02_roughness.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_01_roughness.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_01_roughness.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_02_translucency.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_02_translucency.jpg",
+            "MT_PM_V67_Carica_papaya_Trunk_02_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Trunk_02_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Trunk_02_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Trunk_02_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_01_specular.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_01_specular.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_01_specular.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_01_specular.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_02_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_02_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_01_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_01_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_03_roughness.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_03_roughness.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_01_opacity.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_01_opacity.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_03_opacity.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_03_opacity.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_02_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_02_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_02_opacity.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_02_opacity.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_01_roughness.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_01_roughness.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_02_roughness.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_02_roughness.jpg",
+            "MT_PM_V67_Carica_papaya_Trunk_01_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Trunk_01_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_03_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_03_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Trunk_01_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Trunk_01_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Petiole_01_specular.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Petiole_01_specular.jpg",
+            "MT_PM_V67_Carica_papaya_Petiole_01_normal.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Petiole_01_normal.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_01_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_01_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_02_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_02_albedo.jpg",
+            "MT_PM_V67_Carica_papaya_Flower_02_specular.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Flower_02_specular.jpg",
+            "MT_PM_V67_Carica_papaya_Fruit_01_albedo.jpg": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps\\MT_PM_V67_Carica_papaya_Fruit_01_albedo.jpg"
+          }
+        }
+      },
+      "removed": true,
+      "scan": "E:\\max lib\\Maxtree_Library_Tool\\settings\\jobs\\1392e8c0ee3e433e9d6f5c312447c1de\\result.json",
+      "last_scan": "2026-10-07T19:49:56.254148"
+    },
+    {
+      "id": "user_bfe30e0336ce403782ddaf7260034095",
+      "name": "مكتبة المكتب الفني",
+      "folders": {
+        "mixed": [],
+        "models": [
+          "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\MT Plants model vol\\MT_PM_V67_Forest_Pack_Mesh_Corona\\MT_PM_V67"
+        ],
+        "previews": [
+          "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\MT Plants model vol\\MT_PM_V67_Forest_Pack_Mesh_Corona\\MT_PM_V67\\thumbnails"
+        ],
+        "maps": [
+          "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\Maxtree - Plant Models Vol. 67_Maps\\Maxtree - Plant Models Vol. 67_Maps"
+        ]
+      },
+      "renderer": "corona",
+      "reviews": {},
+      "removed": true,
+      "scan": null
+    }
+  ]
+}

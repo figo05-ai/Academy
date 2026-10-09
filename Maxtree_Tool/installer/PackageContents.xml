@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage 
+    SchemaVersion="1.0" 
+    AutodeskProduct="3ds Max" 
+    ProductType="Application" 
+    AppVersion="3.0.0" 
+    Name="Maxtree Tool" 
+    Description="Maxtree Asset Library Browser and Manager for 3ds Max" 
+    Author="Academy" 
+    ProductCode="{8F23A4D1-90E2-4C12-B89B-490518712345}"
+    UpgradeCode="{7A12B3C0-80D1-3B01-A78A-380407601234}">
+  <CompanyDetails Name="Academy" Url="https://academy.com" />
+  <Components Description="Maxtree Tool Plugin Components">
+    <RuntimeRequirements OS="Win64" Platform="3ds Max" SeriesMin="2025" SeriesMax="2027" />
+    <ComponentEntry 
+        ModuleName="./Contents/MaxtreeMacro.ms" 
+        AppDescription="Maxtree Tool Launcher MacroScript" 
+        Type="PostStartupScript" />
+  </Components>
+</ApplicationPackage>

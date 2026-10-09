@@ -25,3 +25,14 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/bootstrap/cache/*.php
+=Z:/
+Maxtree_Tool.zip
+/dist/
+__pycache__/
+*.pyc
+Maxtree_Tool/Maxtree_Tool/settings/jobs/
+Maxtree_Tool/Maxtree_Tool/settings/ui_validation/
+Maxtree_Tool/Maxtree_Tool/test_*.png
+Maxtree_Tool/Maxtree_Tool/test_*_results.json
+

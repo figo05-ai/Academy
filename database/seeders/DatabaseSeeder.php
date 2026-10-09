@@ -17,21 +17,21 @@ class DatabaseSeeder extends Seeder
     {
         // Create Admin User
         User::firstOrCreate(
-            ['email' => 'admin@academy.com'],
+            ['email' => env('ADMIN_DEFAULT_EMAIL', 'admin@academy.com')],
             [
                 'name' => 'System Administrator',
-                'password' => Hash::make('Admin@123456'),
-                'is_admin' => true, // admin's permission
+                'password' => Hash::make(env('ADMIN_DEFAULT_PASSWORD', 'SecureAdminPass!' . rand(1000, 9999))),
+                'is_admin' => true,
             ]
         );
 
         // Create Regular User
         User::firstOrCreate(
-            ['email' => 'user@academy.com'],
+            ['email' => env('USER_DEFAULT_EMAIL', 'user@academy.com')],
             [
                 'name' => 'Regular Student',
-                'password' => Hash::make('User@123456'),
-                'is_admin' => false, // normal user
+                'password' => Hash::make(env('USER_DEFAULT_PASSWORD', 'SecureUserPass!' . rand(1000, 9999))),
+                'is_admin' => false,
             ]
         );
     }

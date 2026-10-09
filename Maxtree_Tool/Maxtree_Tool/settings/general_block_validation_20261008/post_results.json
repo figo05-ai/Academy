@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "steps": [
+    {
+      "action": "variant_and_category_search",
+      "result": "PASS"
+    },
+    {
+      "action": "library_name_search",
+      "result": "PASS"
+    },
+    {
+      "action": "materialless_block",
+      "result": "PASS"
+    },
+    {
+      "action": "existing_maxtree_insert",
+      "result": "PASS",
+      "path": "E:\\max lib\\maxtree\\MT Plants model vol.67\\MT Plants model vol.67\\MT Plants model vol\\MT_PM_V67_Forest_Pack_Mesh_Corona\\MT_PM_V67\\MT_PM_V67_Carica_papaya_01_03.max",
+      "maps": {
+        "resolved": 37,
+        "missing": 0,
+        "ambiguous": 0
+      },
+      "source_unchanged": true
+    }
+  ]
+}

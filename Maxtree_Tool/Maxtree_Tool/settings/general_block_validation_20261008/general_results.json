@@ -1,0 +1,231 @@
+{
+  "result": "PASS",
+  "pid": 26756,
+  "title": "مكتبة المكتب الفني للبلوكات",
+  "logo": true,
+  "base_entries": 965,
+  "steps": [
+    {
+      "action": "visible_scan_report",
+      "stage": "structured",
+      "summary": {
+        "models": 5,
+        "eligible": 5,
+        "missing": 1,
+        "ambiguous": 1,
+        "previews": 5,
+        "duplicates": 0,
+        "review": 3,
+        "resolved_maps": 2,
+        "unresolved_maps": 2
+      }
+    },
+    {
+      "action": "structured",
+      "result": "PASS",
+      "detail": {
+        "library": "library_bbe9cfe238a8421aa73bab7192a85eea",
+        "entries": 5
+      }
+    },
+    {
+      "action": "visible_scan_report",
+      "stage": "bulk",
+      "summary": {
+        "models": 5,
+        "eligible": 5,
+        "missing": 1,
+        "ambiguous": 2,
+        "previews": 5,
+        "duplicates": 5,
+        "review": 4,
+        "resolved_maps": 2,
+        "unresolved_maps": 2
+      }
+    },
+    {
+      "action": "bulk",
+      "result": "PASS",
+      "detail": {
+        "library": "library_41d3fe9326b743c797c95f982f8183e7",
+        "entries": 5
+      }
+    },
+    {
+      "action": "visible_scan_report",
+      "stage": "single",
+      "summary": {
+        "models": 1,
+        "eligible": 1,
+        "missing": 0,
+        "ambiguous": 0,
+        "previews": 1,
+        "duplicates": 1,
+        "review": 0,
+        "resolved_maps": 1,
+        "unresolved_maps": 0
+      }
+    },
+    {
+      "action": "single",
+      "result": "PASS",
+      "detail": {
+        "library": "library_58665ac194a24c61ada15b7f082c3f7c",
+        "entries": 1
+      }
+    },
+    {
+      "action": "single_copy",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 2,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "single_instance",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 3,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "single_copy_again",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 4,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "multi_full",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 7,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "multi_instance",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 10,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "multi_one",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 11,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "missing",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 11,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "duplicate",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 11,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "review_maps",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 11,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "duplicate_reviewed",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "rename",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "move_duplicate",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "move",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "edit_paths",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "review_objects",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "remove_entry",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "remove_library",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "base_rename",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    },
+    {
+      "action": "bad_record",
+      "result": "PASS",
+      "detail": {
+        "scene_objects": 12,
+        "unrelated_unchanged": true
+      }
+    }
+  ],
+  "source_and_production_settings_unchanged": true
+}

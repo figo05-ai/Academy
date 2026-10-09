@@ -1,0 +1,23 @@
+{
+  "collection": {
+    "id": "draft_f1e883d35ed346688c92b653579d49f8",
+    "workflow": "manual",
+    "renderer": "source",
+    "category": "Architecture",
+    "explicit_models": [
+      "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models\\SingleBlock.max"
+    ],
+    "folders": {
+      "mixed": [],
+      "models": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Models"
+      ],
+      "maps": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Maps"
+      ],
+      "previews": [
+        "E:\\max lib\\Maxtree_Library_Tool\\settings\\general_block_validation_20261008\\fixtures\\Previews"
+      ]
+    }
+  }
+}
