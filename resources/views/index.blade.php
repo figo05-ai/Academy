@@ -3,6 +3,7 @@
 @section('content')
     <div x-data="{
         activeTab: 3,
+        selectedTool: 'maxtree',
         showLoginModal: false,
         showSubscribeModal: false,
         selectedCourseId: null,
@@ -50,7 +51,7 @@
                     'bg-gradient-to-br from-gold-light to-gold text-text-primary shadow-[0_4px_20px_rgba(201,150,58,0.4)] scale-105' :
                     'bg-bg-card border border-glass-border text-text-secondary hover:text-text-primary'"
                 class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
-                أداة Maxtree Tool
+                أدوات المكتب الفني
             </button>
         </div>
 
@@ -735,12 +736,24 @@
             </section>
         </div>
 
-        <!-- Tab 4: Maxtree Tool Download -->
+        <!-- Tab 4: Technical Office Tools -->
         <div x-show="activeTab === 4" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="py-8">
             
-            <div class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-12" aria-label="اختيار مكتبة الأدوات">
+                <button type="button" @click="selectedTool = 'maxtree'" :aria-pressed="selectedTool === 'maxtree'"
+                    :class="selectedTool === 'maxtree' ? 'bg-gradient-to-br from-gold-light to-gold text-text-primary' : 'bg-bg-card border border-glass-border text-text-secondary'"
+                    class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
+                    مكتبة بلوكات الماكس
+                </button>
+                <button type="button" @click="selectedTool = 'sketchup'" :aria-pressed="selectedTool === 'sketchup'"
+                    :class="selectedTool === 'sketchup' ? 'bg-gradient-to-br from-gold-light to-gold text-text-primary' : 'bg-bg-card border border-glass-border text-text-secondary'"
+                    class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
+                    مكتبة أدوات الاسكتش اب
+                </button>
+            </div>
+            <div x-show="selectedTool === 'maxtree'" class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
                 <div class="absolute -top-24 -right-24 w-60 h-60 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-[#4a662e]/10 rounded-full blur-3xl pointer-events-none"></div>
                 
@@ -751,7 +764,7 @@
                 </div>
                 
                 <h3 class="text-3xl md:text-5xl font-black text-text-primary mb-6">
-                    برنامج <span style="color: #c9963a;">Maxtree Tool</span>
+                    <span style="color: #c9963a;">مكتبة بلوكات الماكس</span>
                 </h3>
                 
                 <p class="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8">
@@ -763,7 +776,7 @@
                     <a href="{{ route('maxtree.download') }}"
                         class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-download"></i>
-                        تحميل Maxtree Tool (Windows EXE)
+                        تحميل مكتبة بلوكات الماكس (Windows EXE)
                     </a>
                 </div>
                 
@@ -785,6 +798,36 @@
                         <span class="block text-xs text-text-muted mb-1">حجم الملف</span>
                         <strong class="text-text-primary">~2.3 MB</strong>
                     </div>
+                </div>
+            </div>
+            <div x-show="selectedTool === 'sketchup'" style="display: none;"
+                class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
+                <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-bold mb-6"
+                    style="background-color: rgba(201,150,58,0.15); border: 1px solid rgba(201,150,58,0.3); color: #4a662e;">
+                    SketchUp Plugin
+                </div>
+                <h3 class="text-3xl md:text-5xl font-black text-text-primary mb-6">
+                    <span style="color: #c9963a;">مكتبة أدوات الاسكتش اب</span>
+                </h3>
+                <p class="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+                    مكتبة أدوات المكتب الفني لبرنامج SketchUp: أدوات المناسيب والرسم على الأسطح والبروفايلات والتجميعات والعمارة وتعديل المجسمات.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                    <a href="{{ route('sketchup.download') }}"
+                        class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-download"></i>
+                        تحميل مكتبة أدوات الاسكتش اب (RBZ)
+                    </a>
+                </div>
+                <p class="text-text-secondary leading-relaxed mb-8">
+                    بعد التثبيت من Extension Manager، اضغط Sign In داخل الإضافة لتسجيل الدخول بحساب الأكاديمية.
+                    تشغيل الأدوات يتطلب تفعيل ترخيص هذه المكتبة لحسابك من الإدارة؛ ترخيص مكتبة بلوكات الماكس مستقل عنها.
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-sm text-text-secondary border-t border-glass-border pt-6">
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">الإصدار الحالي</span><strong class="text-text-primary">v{{ \App\Http\Controllers\SketchupDownloadController::CURRENT_VERSION }} Beta</strong></div>
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">البرنامج</span><strong class="text-text-primary">SketchUp</strong></div>
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">صيغة الإضافة</span><strong class="text-text-primary">RBZ</strong></div>
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">التشغيل</span><strong class="text-text-primary">حساب وترخيص مفعّل</strong></div>
                 </div>
             </div>
         </div>

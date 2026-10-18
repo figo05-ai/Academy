@@ -22,3 +22,12 @@ Route::prefix('v1/maxtree')->group(function () {
         Route::post('/auth/logout', [MaxtreeAuthController::class, 'logout']);
     });
 });
+
+Route::prefix('v1/sketchup')->group(function () {
+    Route::post('/auth/device', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'start'])->middleware('throttle:10,1');
+    Route::post('/auth/exchange', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'exchange'])->middleware('throttle:30,1');
+    Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureSketchupTokenAbility::class, 'throttle:120,1'])->group(function () {
+        Route::get('/license/status', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'status']);
+        Route::post('/auth/logout', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'logout']);
+    });
+});

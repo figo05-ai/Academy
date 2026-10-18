@@ -1,0 +1,746 @@
+--- /dev/null
++++ b/app/Http/Controllers/Admin/AdminSketchupLicenseController.php
+@@ -0,0 +1,72 @@
++<?php
++namespace App\Http\Controllers\Admin;
++use App\Models\User;
++use Illuminate\Http\Request;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Routing\Controller;
++class AdminSketchupLicenseController extends Controller {
++    public function getSketchupLicense(User $user): JsonResponse
++    {
++        $license = $user->sketchupLicense;
++
++        return response()->json([
++            'user' => [
++                'id' => $user->id,
++                'name' => $user->name,
++                'email' => $user->email,
++                'is_active' => (bool) $user->is_active,
++            ],
++            'license' => $license ? [
++                'id' => $license->id,
++                'is_active' => (bool) $license->is_active,
++                'expires_at' => $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : null,
++                'notes' => $license->notes,
++                'created_at' => $license->created_at ? $license->created_at->format('Y-m-d H:i') : null,
++            ] : null,
++        ]);
++    }
++
++    /**
++     * Activate, deactivate, or update the Sketchup license for a user.
++     */
++    public function updateSketchupLicense(Request $request, User $user): JsonResponse
++    {
++        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
++            'is_active' => ['required', 'boolean'],
++            'expires_at' => ['nullable', 'date'],
++            'notes' => ['nullable', 'string', 'max:1000'],
++        ]);
++
++        if ($validator->fails()) {
++            return response()->json([
++                'message' => 'بيانات التحديث غير صالحة.',
++                'errors' => $validator->errors(),
++            ], 422);
++        }
++
++        $validated = $validator->validated();
++
++        $expiresAt = ! empty($validated['expires_at']) ? \Illuminate\Support\Carbon::parse($validated['expires_at']) : null;
++
++        $license = $user->sketchupLicense()->updateOrCreate(
++            ['user_id' => $user->id],
++            [
++                'is_active' => (bool) $validated['is_active'],
++                'expires_at' => $expiresAt,
++                'notes' => $validated['notes'] ?? null,
++            ]
++        );
++
++        return response()->json([
++            'success' => 'تم تحديث ترخيص Sketchup بنجاح!',
++            'license' => [
++                'id' => $license->id,
++                'is_active' => (bool) $license->is_active,
++                'expires_at' => $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : null,
++                'notes' => $license->notes,
++            ],
++        ]);
++    }
++
++
++}
+--- /dev/null
++++ b/app/Http/Controllers/Api/V1/SketchupAuthController.php
+@@ -0,0 +1,64 @@
++<?php
++namespace App\Http\Controllers\Api\V1;
++use App\Models\User;
++use App\Services\Licensing\SketchupLicenseService;
++use Illuminate\Http\Request;
++use Illuminate\Routing\Controller;
++use Illuminate\Support\Facades\DB;
++use Illuminate\Support\Carbon;
++class SketchupAuthController extends Controller {
++    private function reply(array $data, int $status = 200) {
++        return response()->json($data, $status)->header('Cache-Control', 'no-store');
++    }
++    public function start(Request $request) {
++        abort_unless($request->isSecure(), 400);
++        $data = $request->validate(['challenge'=>['required','regex:/\A[a-f0-9]{64}\z/'], 'remember'=>['required','boolean']]);
++        $device = bin2hex(random_bytes(32));
++        $code = strtoupper(bin2hex(random_bytes(5)));
++        DB::table('sketchup_device_requests')->insert([
++            'device_hash'=>hash('sha256',$device), 'code_hash'=>hash('sha256',$code),
++            'challenge'=>$data['challenge'], 'remember'=>$data['remember'],
++            'expires_at'=>now()->addMinutes(config('sketchup.device_minutes')), 'created_at'=>now(), 'updated_at'=>now(),
++        ]);
++        // The browser receives only a pairing code, never a device secret or bearer token.
++        return $this->reply(['device_code'=>$device, 'user_code'=>$code, 'interval'=>5,
++            'expires_in'=>config('sketchup.device_minutes')*60,
++            'verification_uri'=>route('sketchup.authorize', ['code'=>$code])]);
++    }
++    public function exchange(Request $request) {
++        abort_unless($request->isSecure(), 400);
++        $data=$request->validate(['device_code'=>['required','regex:/\A[a-f0-9]{64}\z/'], 'verifier'=>['required','regex:/\A[a-f0-9]{64}\z/']]);
++        return DB::transaction(function () use ($data) {
++            $row=DB::table('sketchup_device_requests')->where('device_hash',hash('sha256',$data['device_code']))->lockForUpdate()->first();
++            if (!$row || $row->consumed_at || Carbon::parse($row->expires_at)->lessThanOrEqualTo(now()) || !hash_equals($row->challenge,hash('sha256',$data['verifier']))) {
++                return $this->reply(['error_code'=>'DEVICE_EXPIRED'],400);
++            }
++            if (!$row->user_id) return $this->reply(['error_code'=>'AUTHORIZATION_PENDING'],202);
++            DB::table('sketchup_device_requests')->where('id',$row->id)->update(['consumed_at'=>now()]);
++            $user=User::find($row->user_id);
++            if (!$user || !$user->is_active) return $this->reply(['error_code'=>'ACCOUNT_DISABLED'],403);
++            $expiry=$row->remember ? now()->addDays(config('sketchup.remember_days')) : now()->addMinutes(config('session.lifetime'));
++            $token=$user->createToken('sketchup-plugin-token',['sketchup:access'],$expiry);
++            return $this->reply(['token'=>$token->plainTextToken,'expires_at'=>$expiry->toIso8601String()]);
++        });
++    }
++    public function status(Request $request, SketchupLicenseService $licenses) {
++        abort_unless($request->isSecure(),400);
++        $user=$request->user();
++        if ($error=$licenses->error($user)) return $this->reply(['authorized'=>false,'error_code'=>$error],403);
++        $license=$user->sketchupLicense()->first();
++        $token=$user->currentAccessToken();
++        $deadline=now()->addSeconds(config('sketchup.lease_seconds'));
++        foreach ([$license->expires_at,$token->expires_at,config('sanctum.expiration') ? $token->created_at->addMinutes(config('sanctum.expiration')) : null] as $expiry) {
++            if ($expiry && $expiry->lessThan($deadline)) $deadline=$expiry;
++        }
++        return $this->reply(['authorized'=>true,'product'=>'technical-office-sketchup',
++            'lease_seconds'=>max(0,(int) now()->diffInSeconds($deadline,false)),
++            'user'=>['name'=>$user->name],'expires_at'=>$license->expires_at?->toIso8601String()]);
++    }
++    public function logout(Request $request) {
++        abort_unless($request->isSecure(),400);
++        $request->user()->currentAccessToken()->delete();
++        return $this->reply(['revoked'=>true]);
++    }
++}
+--- /dev/null
++++ b/app/Http/Controllers/SketchupAuthorizationController.php
+@@ -0,0 +1,23 @@
++<?php
++namespace App\Http\Controllers;
++use Illuminate\Http\Request;
++use Illuminate\Routing\Controller;
++use Illuminate\Support\Facades\DB;
++class SketchupAuthorizationController extends Controller {
++    private function code(Request $request): string {
++        abort_unless($request->isSecure(),400);
++        return $request->validate(['code'=>['required','regex:/\A[A-F0-9]{10}\z/']])['code'];
++    }
++    public function show(Request $request) {
++        $code=$this->code($request);
++        abort_unless(DB::table('sketchup_device_requests')->where('code_hash',hash('sha256',$code))->whereNull('user_id')->whereNull('consumed_at')->where('expires_at','>',now())->exists(),410);
++        return response()->view('sketchup.authorize',compact('code'))->header('Cache-Control','no-store')->header('Referrer-Policy','no-referrer');
++    }
++    public function approve(Request $request) {
++        $code=$this->code($request);
++        abort_unless($request->user()->is_active,403);
++        $updated=DB::table('sketchup_device_requests')->where('code_hash',hash('sha256',$code))->whereNull('user_id')->whereNull('consumed_at')->where('expires_at','>',now())->update(['user_id'=>$request->user()->id,'updated_at'=>now()]);
++        abort_unless($updated===1,410);
++        return response()->view('sketchup.approved')->header('Cache-Control','no-store');
++    }
++}
+--- /dev/null
++++ b/app/Http/Controllers/SketchupDownloadController.php
+@@ -0,0 +1,32 @@
++<?php
++namespace App\Http\Controllers;
++
++use Illuminate\Routing\Controller;
++use Illuminate\Support\Facades\Storage;
++
++class SketchupDownloadController extends Controller
++{
++    public const CURRENT_VERSION = '0.6.2';
++    public const RELEASE_FILENAME = 'Technical_Office_Tools_v0.6.2.rbz';
++    public const RELATIVE_STORAGE_PATH = 'sketchup/releases/Technical_Office_Tools_v0.6.2.rbz';
++
++    public function download()
++    {
++        $disk = Storage::disk('public');
++        abort_unless($disk->exists(self::RELATIVE_STORAGE_PATH), 404, 'ملف الإضافة غير متاح حاليًا.');
++        $expected = config('sketchup.release_sha256');
++        abort_unless(is_string($expected) && preg_match('/\A[a-f0-9]{64}\z/i', $expected), 503, 'النسخة المحمية قيد التجهيز.');
++        $stream = $disk->readStream(self::RELATIVE_STORAGE_PATH);
++        abort_unless(is_resource($stream), 503);
++        try {
++            $hash = hash_init('sha256');
++            hash_update_stream($hash, $stream);
++            abort_unless(hash_equals(strtolower($expected), hash_final($hash)), 503, 'ملف الإصدار غير معتمد.');
++        } finally {
++            fclose($stream);
++        }
++        return $disk->download(self::RELATIVE_STORAGE_PATH, self::RELEASE_FILENAME, [
++            'Content-Type' => 'application/octet-stream',
++        ]);
++    }
++}
+--- /dev/null
++++ b/app/Http/Middleware/EnsureSketchupTokenAbility.php
+@@ -0,0 +1,42 @@
++<?php
++
++namespace App\Http\Middleware;
++
++use Closure;
++use Illuminate\Http\Request;
++use Laravel\Sanctum\PersonalAccessToken;
++use Symfony\Component\HttpFoundation\Response;
++
++class EnsureSketchupTokenAbility
++{
++    /**
++     * Handle an incoming request.
++     *
++     * Ensures the request is authenticated via a genuine Sanctum PersonalAccessToken
++     * with the required 'sketchup:access' token ability.
++     * Web session cookies and transient tokens are explicitly rejected.
++     */
++    public function handle(Request $request, Closure $next): Response
++    {
++        $user = $request->user();
++        $token = $user?->currentAccessToken();
++
++        if (! $user || ! $token || ! ($token instanceof PersonalAccessToken)) {
++            return response()->json([
++                'status' => 'error',
++                'error_code' => 'UNAUTHORIZED',
++                'message' => 'A valid Sketchup API Bearer Token is required.',
++            ], 401);
++        }
++
++        if (! $token->can('sketchup:access')) {
++            return response()->json([
++                'status' => 'error',
++                'error_code' => 'UNAUTHORIZED',
++                'message' => 'Token does not have required sketchup:access ability.',
++            ], 403);
++        }
++
++        return $next($request);
++    }
++}
+--- /dev/null
++++ b/app/Models/SketchupLicense.php
+@@ -0,0 +1,51 @@
++<?php
++
++namespace App\Models;
++
++use Illuminate\Database\Eloquent\Factories\HasFactory;
++use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Relations\BelongsTo;
++
++/**
++ * @property int $id
++ * @property int $user_id
++ * @property bool $is_active
++ * @property \Illuminate\Support\Carbon|null $expires_at
++ * @property string|null $notes
++ * @property \Illuminate\Support\Carbon $created_at
++ * @property \Illuminate\Support\Carbon $updated_at
++ * @property-read \App\Models\User $user
++ */
++class SketchupLicense extends Model
++{
++    use HasFactory;
++
++    protected $fillable = [
++        'user_id',
++        'is_active',
++        'expires_at',
++        'notes',
++    ];
++
++    protected $attributes = [
++        'is_active' => false,
++    ];
++
++    /**
++     * Get the attributes that should be cast.
++     *
++     * @return array<string, string>
++     */
++    protected function casts(): array
++    {
++        return [
++            'is_active' => 'boolean',
++            'expires_at' => 'datetime',
++        ];
++    }
++
++    public function user(): BelongsTo
++    {
++        return $this->belongsTo(User::class);
++    }
++}
+--- a/app/Models/User.php
++++ b/app/Models/User.php
+@@ -56,6 +56,11 @@
+         return $this->belongsToMany(Session::class, 'session_user')->withPivot('is_completed')->withTimestamps();
+     }
+ 
++    public function sketchupLicense(): HasOne
++    {
++        return $this->hasOne(SketchupLicense::class);
++    }
++
+     public function maxtreeLicense(): HasOne
+     {
+         return $this->hasOne(MaxtreeLicense::class);
+--- /dev/null
++++ b/app/Services/Licensing/SketchupLicenseService.php
+@@ -0,0 +1,13 @@
++<?php
++namespace App\Services\Licensing;
++use App\Models\User;
++class SketchupLicenseService {
++    public function error(?User $user): ?string {
++        if (!$user || !$user->is_active) return 'ACCOUNT_DISABLED';
++        $license = $user->sketchupLicense()->first();
++        if (!$license) return 'LICENSE_NOT_FOUND';
++        if (!$license->is_active) return 'LICENSE_INACTIVE';
++        if ($license->expires_at && $license->expires_at->lessThanOrEqualTo(now())) return 'LICENSE_EXPIRED';
++        return null;
++    }
++}
+--- a/bootstrap/app.php
++++ b/bootstrap/app.php
+@@ -18,6 +18,7 @@
+         ]);
+     })
+     ->withExceptions(function (Exceptions $exceptions) {
++        $exceptions->dontFlash(['device_code', 'verifier', 'token']);
+         $exceptions->shouldRenderJsonWhen(
+             fn (Request $request) => $request->is('api/*'),
+         );
+--- /dev/null
++++ b/config/sketchup.php
+@@ -0,0 +1,8 @@
++<?php
++return [
++    // Set only to the hash of the final officially encrypted/signed RBZ.
++    'release_sha256' => env('SKETCHUP_RELEASE_SHA256', '01a630c199713f53bbf21d3e48611b3e14b5cec856a20170b0e690d8760c0dae'),
++    'device_minutes' => 5,
++    'remember_days' => 30, // Same maximum as the existing Maxtree token policy.
++    'lease_seconds' => 30,
++];
+--- /dev/null
++++ b/database/migrations/2026_10_18_000001_create_sketchup_licenses_table.php
+@@ -0,0 +1,31 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++
++return new class extends Migration
++{
++    /**
++     * Run the migrations.
++     */
++    public function up(): void
++    {
++        Schema::create('sketchup_licenses', function (Blueprint $table) {
++            $table->id();
++            $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
++            $table->boolean('is_active')->default(false);
++            $table->timestamp('expires_at')->nullable();
++            $table->text('notes')->nullable();
++            $table->timestamps();
++        });
++    }
++
++    /**
++     * Reverse the migrations.
++     */
++    public function down(): void
++    {
++        Schema::dropIfExists('sketchup_licenses');
++    }
++};
+--- /dev/null
++++ b/database/migrations/2026_10_18_000002_create_sketchup_device_requests_table.php
+@@ -0,0 +1,20 @@
++<?php
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++return new class extends Migration {
++    public function up(): void {
++        Schema::create('sketchup_device_requests', function (Blueprint $table) {
++            $table->id();
++            $table->string('device_hash', 64)->unique();
++            $table->string('code_hash', 64)->unique();
++            $table->string('challenge', 64);
++            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
++            $table->boolean('remember')->default(false);
++            $table->timestamp('expires_at')->index();
++            $table->timestamp('consumed_at')->nullable();
++            $table->timestamps();
++        });
++    }
++    public function down(): void { Schema::dropIfExists('sketchup_device_requests'); }
++};
+--- a/resources/views/Admin/users/index.blade.php
++++ b/resources/views/Admin/users/index.blade.php
+@@ -82,6 +82,7 @@
+                                             data-user-email="{{ $user->email }}">
+                                         <i class="fa-solid fa-pen"></i> تعديل
+                                     </button>
++                                    <a href="{{ route('admin.users.sketchup.edit', $user) }}" class="px-3 py-1.5 rounded-lg border font-semibold text-sm">ترخيص SketchUp — المكتب الفني</a>
+                                     <button class="btn-maxtree-license px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-white border border-amber-500/30 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2"
+                                             data-user-id="{{ $user->id }}"
+                                             data-user-name="{{ $user->name }}">
+--- /dev/null
++++ b/resources/views/Admin/users/sketchup.blade.php
+@@ -0,0 +1,19 @@
++@extends('layouts.app')
++@section('content')
++<div class="p-6"><h1>ترخيص مكتبة أدوات المكتب الفني — SketchUp</h1><p>{{ $user->name }} — {{ $user->email }}</p>
++<p>هذا الترخيص مستقل عن Maxtree والكورسات. يلزم أيضًا أن يكون الحساب نشطًا.</p>
++<form id="sketchup-license" action="{{ route('admin.users.sketchup.update', $user) }}">@csrf
++<label><input type="checkbox" name="is_active" @checked($user->sketchupLicense?->is_active)> تفعيل الإضافة</label>
++<label>انتهاء الترخيص (بتوقيت الموقع {{ config('app.timezone') }})<input type="datetime-local" name="expires_at" value="{{ $user->sketchupLicense?->expires_at?->format('Y-m-d\TH:i') }}"></label>
++<p>اترك تاريخ الانتهاء فارغًا لترخيص بلا موعد انتهاء؛ تسجيل الدخول والتحقق الدوري يظلان إلزاميين.</p>
++<label>ملاحظات<textarea name="notes" maxlength="1000">{{ $user->sketchupLicense?->notes }}</textarea></label>
++<button type="submit">حفظ الترخيص</button><p id="result" role="status"></p></form><a href="{{ route('admin.users.index') }}">العودة للمستخدمين</a></div>
++<script>
++document.getElementById('sketchup-license').addEventListener('submit',async function(e){
++ e.preventDefault();const out=document.getElementById('result');out.textContent='جارٍ الحفظ…';
++ try{const response=await fetch(this.action,{method:'PUT',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':this.elements._token.value},body:JSON.stringify({is_active:this.elements.is_active.checked,expires_at:this.elements.expires_at.value||null,notes:this.elements.notes.value})});
++ out.textContent=response.ok?'تم حفظ ترخيص SketchUp.':'تعذر الحفظ؛ تحقق من البيانات وصلاحية جلسة المسؤول.';
++ }catch(e){out.textContent='تعذر الاتصال. لم يتم تأكيد حفظ الترخيص.';}
++});
++</script>
++@endsection
+--- a/resources/views/index.blade.php
++++ b/resources/views/index.blade.php
+@@ -3,6 +3,7 @@
+ @section('content')
+     <div x-data="{
+         activeTab: 3,
++        selectedTool: 'maxtree',
+         showLoginModal: false,
+         showSubscribeModal: false,
+         selectedCourseId: null,
+@@ -50,7 +51,7 @@
+                     'bg-gradient-to-br from-gold-light to-gold text-text-primary shadow-[0_4px_20px_rgba(201,150,58,0.4)] scale-105' :
+                     'bg-bg-card border border-glass-border text-text-secondary hover:text-text-primary'"
+                 class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
+-                أداة Maxtree Tool
++                أدوات المكتب الفني
+             </button>
+         </div>
+ 
+@@ -735,12 +736,24 @@
+             </section>
+         </div>
+ 
+-        <!-- Tab 4: Maxtree Tool Download -->
++        <!-- Tab 4: Technical Office Tools -->
+         <div x-show="activeTab === 4" x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+             style="display: none;" class="py-8">
+             
+-            <div class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
++            <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-12" aria-label="اختيار مكتبة الأدوات">
++                <button type="button" @click="selectedTool = 'maxtree'" :aria-pressed="selectedTool === 'maxtree'"
++                    :class="selectedTool === 'maxtree' ? 'bg-gradient-to-br from-gold-light to-gold text-text-primary' : 'bg-bg-card border border-glass-border text-text-secondary'"
++                    class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
++                    مكتبة بلوكات الماكس
++                </button>
++                <button type="button" @click="selectedTool = 'sketchup'" :aria-pressed="selectedTool === 'sketchup'"
++                    :class="selectedTool === 'sketchup' ? 'bg-gradient-to-br from-gold-light to-gold text-text-primary' : 'bg-bg-card border border-glass-border text-text-secondary'"
++                    class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
++                    مكتبة أدوات الاسكتش اب
++                </button>
++            </div>
++            <div x-show="selectedTool === 'maxtree'" class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
+                 <div class="absolute -top-24 -right-24 w-60 h-60 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+                 <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-[#4a662e]/10 rounded-full blur-3xl pointer-events-none"></div>
+                 
+@@ -751,7 +764,7 @@
+                 </div>
+                 
+                 <h3 class="text-3xl md:text-5xl font-black text-text-primary mb-6">
+-                    برنامج <span style="color: #c9963a;">Maxtree Tool</span>
++                    <span style="color: #c9963a;">مكتبة بلوكات الماكس</span>
+                 </h3>
+                 
+                 <p class="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+@@ -763,7 +776,7 @@
+                     <a href="{{ route('maxtree.download') }}"
+                         class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
+                         <i class="fa-solid fa-download"></i>
+-                        تحميل Maxtree Tool (Windows EXE)
++                        تحميل مكتبة بلوكات الماكس (Windows EXE)
+                     </a>
+                 </div>
+                 
+@@ -785,6 +798,36 @@
+                         <span class="block text-xs text-text-muted mb-1">حجم الملف</span>
+                         <strong class="text-text-primary">~2.3 MB</strong>
+                     </div>
++                </div>
++            </div>
++            <div x-show="selectedTool === 'sketchup'" style="display: none;"
++                class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
++                <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-bold mb-6"
++                    style="background-color: rgba(201,150,58,0.15); border: 1px solid rgba(201,150,58,0.3); color: #4a662e;">
++                    SketchUp Plugin
++                </div>
++                <h3 class="text-3xl md:text-5xl font-black text-text-primary mb-6">
++                    <span style="color: #c9963a;">مكتبة أدوات الاسكتش اب</span>
++                </h3>
++                <p class="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8">
++                    مكتبة أدوات المكتب الفني لبرنامج SketchUp: أدوات المناسيب والرسم على الأسطح والبروفايلات والتجميعات والعمارة وتعديل المجسمات.
++                </p>
++                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
++                    <a href="{{ route('sketchup.download') }}"
++                        class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
++                        <i class="fa-solid fa-download"></i>
++                        تحميل مكتبة أدوات الاسكتش اب (RBZ)
++                    </a>
++                </div>
++                <p class="text-text-secondary leading-relaxed mb-8">
++                    بعد التثبيت من Extension Manager، اضغط Sign In داخل الإضافة لتسجيل الدخول بحساب الأكاديمية.
++                    تشغيل الأدوات يتطلب تفعيل ترخيص هذه المكتبة لحسابك من الإدارة؛ ترخيص مكتبة بلوكات الماكس مستقل عنها.
++                </p>
++                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-sm text-text-secondary border-t border-glass-border pt-6">
++                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">الإصدار الحالي</span><strong class="text-text-primary">v{{ \App\Http\Controllers\SketchupDownloadController::CURRENT_VERSION }} Beta</strong></div>
++                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">البرنامج</span><strong class="text-text-primary">SketchUp</strong></div>
++                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">صيغة الإضافة</span><strong class="text-text-primary">RBZ</strong></div>
++                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">التشغيل</span><strong class="text-text-primary">حساب وترخيص مفعّل</strong></div>
+                 </div>
+             </div>
+         </div>
+--- /dev/null
++++ b/resources/views/sketchup/approved.blade.php
+@@ -0,0 +1 @@
++<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>تم ربط الحساب</title><h1>تمت الموافقة</h1><p>ارجع إلى SketchUp؛ سيُفحص ترخيص مكتبة أدوات المكتب الفني تلقائيًا. يمكنك إغلاق هذه الصفحة.</p></html>
+--- /dev/null
++++ b/resources/views/sketchup/authorize.blade.php
+@@ -0,0 +1,6 @@
++<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width"><title>ربط إضافة SketchUp</title>
++<body><main><h1>مكتبة أدوات المكتب الفني — SketchUp</h1><p>الحساب: {{ auth()->user()->name }} ({{ auth()->user()->email }})</p>
++<p>وافق فقط إذا بدأت تسجيل الدخول من إضافتك وكان الرمز التالي مطابقًا للظاهر داخل SketchUp:</p><h2 dir="ltr">{{ $code }}</h2>
++<p>ربط الحساب لا يمنح ترخيصًا؛ يجب أن يفعّل المسؤول هذه الإضافة لحسابك.</p>
++<form method="post" action="{{ route('sketchup.approve') }}">@csrf<input type="hidden" name="code" value="{{ $code }}"><button type="submit">تأكيد ربط حسابي بإضافة SketchUp</button></form>
++<form method="post" action="{{ route('logout') }}">@csrf<button type="submit">تسجيل الخروج لاستخدام حساب آخر</button></form></main></body></html>
+--- a/routes/api.php
++++ b/routes/api.php
+@@ -22,3 +22,12 @@
+         Route::post('/auth/logout', [MaxtreeAuthController::class, 'logout']);
+     });
+ });
++
++Route::prefix('v1/sketchup')->group(function () {
++    Route::post('/auth/device', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'start'])->middleware('throttle:10,1');
++    Route::post('/auth/exchange', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'exchange'])->middleware('throttle:30,1');
++    Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureSketchupTokenAbility::class, 'throttle:120,1'])->group(function () {
++        Route::get('/license/status', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'status']);
++        Route::post('/auth/logout', [\App\Http\Controllers\Api\V1\SketchupAuthController::class,'logout']);
++    });
++});
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -29,6 +29,18 @@
+ 
+ // Maxtree Tool Installer Public Download Route
+ Route::get('/maxtree/download', [MaxtreeDownloadController::class, 'download'])->name('maxtree.download');
++
++Route::middleware('auth')->group(function () {
++    Route::get('/sketchup/authorize', [\App\Http\Controllers\SketchupAuthorizationController::class, 'show'])->name('sketchup.authorize');
++    Route::post('/sketchup/authorize', [\App\Http\Controllers\SketchupAuthorizationController::class, 'approve'])->middleware('throttle:10,1')->name('sketchup.approve');
++});
++Route::middleware(['auth', AdminMiddleware::class])->group(function () {
++    Route::get('/admin/users/{user}/sketchup-license/edit', fn (\App\Models\User $user) => view('Admin.users.sketchup', compact('user')))->name('admin.users.sketchup.edit');
++    Route::get('/admin/users/{user}/sketchup-license', [\App\Http\Controllers\Admin\AdminSketchupLicenseController::class, 'getSketchupLicense'])->name('admin.users.sketchup.get');
++    Route::put('/admin/users/{user}/sketchup-license', [\App\Http\Controllers\Admin\AdminSketchupLicenseController::class, 'updateSketchupLicense'])->name('admin.users.sketchup.update');
++});
++
++Route::get('/sketchup/download', [\App\Http\Controllers\SketchupDownloadController::class, 'download'])->name('sketchup.download');
+ 
+ // Authentication Routes
+ Route::get('/register', function () {
+--- /dev/null
++++ b/tests/Feature/SketchupAuthTest.php
+@@ -0,0 +1,122 @@
++<?php
++namespace Tests\Feature;
++use App\Models\User;
++use Illuminate\Foundation\Testing\RefreshDatabase;
++use Illuminate\Support\Facades\DB;
++use Laravel\Sanctum\PersonalAccessToken;
++use Tests\TestCase;
++
++class SketchupAuthTest extends TestCase
++{
++    use RefreshDatabase;
++    private string $base='https://localhost/api/v1/sketchup';
++    protected function setUp(): void {
++        parent::setUp();
++        config(['app.key'=>'base64:'.base64_encode(random_bytes(32))]);
++        $this->withoutVite();
++    }
++    private function member(): User { return User::factory()->create(['is_active'=>true,'is_admin'=>false]); }
++    private function bearer(User $user, string $ability='sketchup:access', $expiry=null): string {
++        return $user->createToken('test',[$ability],$expiry ?? now()->addDays(30))->plainTextToken;
++    }
++    private function licenseStatus(string $token) {
++        // Force a fresh authentication guard just as separate HTTP requests do.
++        app('auth')->forgetGuards();
++        return $this->withToken($token)->getJson($this->base.'/license/status');
++    }
++    private function pair(bool $remember=false): array {
++        $verifier=bin2hex(random_bytes(32));
++        $result=$this->postJson($this->base.'/auth/device',['challenge'=>hash('sha256',$verifier),'remember'=>$remember])->assertOk();
++        return [$result->json(),$verifier];
++    }
++    public function test_no_session_denied(): void { $this->getJson($this->base.'/license/status')->assertUnauthorized(); }
++    public function test_product_license_is_required_and_independent(): void {
++        $user=$this->member();$token=$this->bearer($user);
++        $this->licenseStatus($token)->assertForbidden()->assertJsonPath('error_code','LICENSE_NOT_FOUND');
++        $user->maxtreeLicense()->create(['is_active'=>true]);
++        $this->licenseStatus($token)->assertForbidden()->assertJsonPath('error_code','LICENSE_NOT_FOUND');
++        $user->sketchupLicense()->create(['is_active'=>true]);
++        $this->licenseStatus($token)->assertOk()->assertJsonPath('authorized',true)->assertJsonPath('product','technical-office-sketchup');
++        $this->assertTrue($user->maxtreeLicense()->first()->is_active);
++    }
++    public function test_revocation_expiry_and_disabled_account_are_live(): void {
++        $user=$this->member();$license=$user->sketchupLicense()->create(['is_active'=>true]);$token=$this->bearer($user);
++        $this->licenseStatus($token)->assertOk();
++        $license->update(['is_active'=>false]);$this->licenseStatus($token)->assertJsonPath('error_code','LICENSE_INACTIVE');
++        $license->update(['is_active'=>true,'expires_at'=>now()->subSecond()]);$this->licenseStatus($token)->assertJsonPath('error_code','LICENSE_EXPIRED');
++        $user->update(['is_active'=>false]);$this->licenseStatus($token)->assertJsonPath('error_code','ACCOUNT_DISABLED');
++    }
++    public function test_token_expiry_and_logout(): void {
++        $user=$this->member();$user->sketchupLicense()->create(['is_active'=>true]);
++        $this->licenseStatus($this->bearer($user,'sketchup:access',now()->subSecond()))->assertUnauthorized();
++        $token=$this->bearer($user);$this->licenseStatus($token)->assertOk();
++        app('auth')->forgetGuards();$this->withToken($token)->postJson($this->base.'/auth/logout')->assertOk();
++        $this->licenseStatus($token)->assertUnauthorized();
++    }
++    public function test_maxtree_token_cannot_access_sketchup_and_reverse(): void {
++        $user=$this->member();$user->sketchupLicense()->create(['is_active'=>true]);$user->maxtreeLicense()->create(['is_active'=>true]);
++        $this->licenseStatus($this->bearer($user,'maxtree:access'))->assertForbidden();
++        app('auth')->forgetGuards();$this->withToken($this->bearer($user))->getJson('https://localhost/api/v1/maxtree/license/status')->assertForbidden();
++    }
++    public function test_browser_session_cannot_replace_sketchup_bearer(): void {
++        $this->actingAs($this->member())->getJson($this->base.'/license/status')->assertUnauthorized();
++    }
++    public function test_pairing_requires_browser_approval_and_verifier_and_is_single_use(): void {
++        [$pair,$verifier]=$this->pair();
++        $payload=['device_code'=>$pair['device_code'],'verifier'=>$verifier];
++        $this->postJson($this->base.'/auth/exchange',$payload)->assertStatus(202);
++        $user=$this->member();
++        $this->actingAs($user)->get('https://localhost/sketchup/authorize?code='.$pair['user_code'])->assertOk()->assertSee($pair['user_code']);
++        $this->post('https://localhost/sketchup/authorize',['code'=>$pair['user_code']])->assertOk();
++        $this->post('https://localhost/sketchup/authorize',['code'=>$pair['user_code']])->assertStatus(410);
++        $this->postJson($this->base.'/auth/exchange',['device_code'=>$pair['device_code'],'verifier'=>str_repeat('a',64)])->assertStatus(400);
++        $response=$this->postJson($this->base.'/auth/exchange',$payload)->assertOk();
++        $issued=PersonalAccessToken::findToken($response->json('token'));
++        $this->assertSame($user->id,$issued->tokenable_id);
++        $this->assertSame(['sketchup:access'],$issued->abilities);
++        $this->assertLessThanOrEqual(config('session.lifetime')*60+1,now()->diffInSeconds($issued->expires_at));
++        $this->postJson($this->base.'/auth/exchange',$payload)->assertStatus(400);
++        $this->assertDatabaseMissing('sketchup_licenses',['user_id'=>$user->id]);
++    }
++    public function test_expired_pair_cannot_be_approved_or_exchanged(): void {
++        [$pair,$verifier]=$this->pair();$this->travel(6)->minutes();
++        $this->actingAs($this->member())->post('https://localhost/sketchup/authorize',['code'=>$pair['user_code']])->assertStatus(410);
++        $this->postJson($this->base.'/auth/exchange',['device_code'=>$pair['device_code'],'verifier'=>$verifier])->assertStatus(400);
++    }
++    public function test_remember_me_uses_30_day_policy(): void {
++        [$pair,$verifier]=$this->pair(true);
++        $this->actingAs($this->member())->post('https://localhost/sketchup/authorize',['code'=>$pair['user_code']])->assertOk();
++        $response=$this->postJson($this->base.'/auth/exchange',['device_code'=>$pair['device_code'],'verifier'=>$verifier])->assertOk();
++        $token=PersonalAccessToken::findToken($response->json('token'));
++        $this->assertEqualsWithDelta(30,now()->diffInDays($token->expires_at),0.001);
++    }
++    public function test_browser_requires_login_and_csrf(): void {
++        [$pair]=$this->pair();
++        $url='https://localhost/sketchup/authorize?code='.$pair['user_code'];
++        $this->get($url)->assertRedirect();
++        $this->actingAs($this->member());
++        // Laravel skips CSRF while running unit tests; switch only the environment check.
++        $this->app->instance('env','csrf-check');
++        $this->post('https://localhost/sketchup/authorize',['code'=>$pair['user_code']])->assertStatus(419);
++    }
++    public function test_https_is_required(): void {
++        $this->postJson('http://localhost/api/v1/sketchup/auth/device',['challenge'=>str_repeat('a',64),'remember'=>false])->assertStatus(400);
++    }
++    public function test_admin_can_grant_and_revoke_without_changing_maxtree(): void {
++        $admin=User::factory()->create(['is_admin'=>true,'is_active'=>true]);$user=$this->member();
++        $user->maxtreeLicense()->create(['is_active'=>true]);
++        $url='https://localhost/admin/users/'.$user->id.'/sketchup-license';
++        $this->actingAs($admin)->putJson($url,['is_active'=>true,'expires_at'=>now()->addDay()->toIso8601String()])->assertOk();
++        $this->get($url.'/edit')->assertOk()->assertSee('SketchUp');
++        $this->assertTrue($user->sketchupLicense()->first()->is_active);
++        $this->putJson($url,['is_active'=>false])->assertOk();
++        $this->assertFalse($user->sketchupLicense()->first()->is_active);
++        $this->assertTrue($user->maxtreeLicense()->first()->is_active);
++        $this->actingAs($user)->putJson($url,['is_active'=>true])->assertForbidden();
++    }
++    public function test_admin_form_requires_csrf(): void {
++        $admin=User::factory()->create(['is_admin'=>true]);$user=$this->member();
++        $this->actingAs($admin);$this->app->instance('env','csrf-check');
++        $this->putJson('https://localhost/admin/users/'.$user->id.'/sketchup-license',['is_active'=>true])->assertStatus(419);
++    }
++}
+--- /dev/null
++++ b/tests/Feature/SketchupDownloadTest.php
+@@ -0,0 +1,26 @@
++<?php
++namespace Tests\Feature;
++use Illuminate\Support\Facades\Storage;
++use App\Http\Controllers\SketchupDownloadController as Release;
++use Tests\TestCase;
++class SketchupDownloadTest extends TestCase {
++    public function test_unapproved_package_is_not_downloadable(): void {
++        Storage::fake('public');
++        Storage::disk('public')->put(Release::RELATIVE_STORAGE_PATH,'unapproved fixture');
++        config(['sketchup.release_sha256'=>null]);
++        $this->get('/sketchup/download')->assertStatus(503);
++    }
++    public function test_changed_package_is_rejected(): void {
++        Storage::fake('public');
++        Storage::disk('public')->put(Release::RELATIVE_STORAGE_PATH,'modified fixture');
++        config(['sketchup.release_sha256'=>hash('sha256','approved fixture')]);
++        $this->get('/sketchup/download')->assertStatus(503);
++    }
++    public function test_exact_approved_bytes_are_downloaded(): void {
++        // Tests download integrity only; does not claim this fixture is encrypted/signed.
++        Storage::fake('public');
++        Storage::disk('public')->put(Release::RELATIVE_STORAGE_PATH,'approved fixture');
++        config(['sketchup.release_sha256'=>hash('sha256','approved fixture')]);
++        $this->get('/sketchup/download')->assertDownload(Release::RELEASE_FILENAME);
++    }
++}

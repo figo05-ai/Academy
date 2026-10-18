@@ -56,6 +56,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Session::class, 'session_user')->withPivot('is_completed')->withTimestamps();
     }
 
+    public function sketchupLicense(): HasOne
+    {
+        return $this->hasOne(SketchupLicense::class);
+    }
+
     public function maxtreeLicense(): HasOne
     {
         return $this->hasOne(MaxtreeLicense::class);

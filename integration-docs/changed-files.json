@@ -1,0 +1,188 @@
+[
+  {
+    "project": "Academy",
+    "path": "app/Http/Controllers/Admin/AdminSketchupLicenseController.php",
+    "original_sha256": null,
+    "sha256": "31a8b5557b73a89d6b0924fc94e7ad66438007dfd67d7cbcfd945f04892e0e49"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Http/Controllers/Api/V1/SketchupAuthController.php",
+    "original_sha256": null,
+    "sha256": "bb849282454fe2de0d6d07c6cd11dfd47e4d77e8869c4c56a3f140484f39ad3c"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Http/Controllers/SketchupAuthorizationController.php",
+    "original_sha256": null,
+    "sha256": "4ce9b07aca66da572f92483e6bff36d76306facebcb0ce77d8d2021c30509946"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Http/Controllers/SketchupDownloadController.php",
+    "original_sha256": null,
+    "sha256": "3ef7105b4001fbb7ecf60905a286ac43509e7d35219e031056bc73e59bb1eeb2"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Http/Middleware/EnsureSketchupTokenAbility.php",
+    "original_sha256": null,
+    "sha256": "d6c25cc2fe74a224f629a77c3af1a79fac24c89854234f23018b7e43f89bebbc"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Models/SketchupLicense.php",
+    "original_sha256": null,
+    "sha256": "b3e76ac30196fb7f4d9931392a92993c203f07922613da3af82b841d2d6fde32"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Models/User.php",
+    "original_sha256": "023c187c14d8e8e43ecbede3bd1342a93708c92c40eee4d7f846cb3a44f9951b",
+    "sha256": "601367329d421baf5effa3c09f385ade2d3c763a34629d62d48df0c79812789f"
+  },
+  {
+    "project": "Academy",
+    "path": "app/Services/Licensing/SketchupLicenseService.php",
+    "original_sha256": null,
+    "sha256": "8d59f6c07cb337340de4db8a76d4cd137447722f883f63b19f245570bd9e9477"
+  },
+  {
+    "project": "Academy",
+    "path": "bootstrap/app.php",
+    "original_sha256": "e61d84818478a4b8bfb6280e259798edd8b506e39d5e938245ae4f65caf77192",
+    "sha256": "d9abe075cc7b4678444e48a3d4584fe60440979f7fc99835da66322b3f1d0a1a"
+  },
+  {
+    "project": "Academy",
+    "path": "config/sketchup.php",
+    "original_sha256": null,
+    "sha256": "3979ab7178342d07be2455670c6e1ca0a8646b19ba60c37b9417fc96ae9e9f0c"
+  },
+  {
+    "project": "Academy",
+    "path": "database/migrations/2026_10_18_000001_create_sketchup_licenses_table.php",
+    "original_sha256": null,
+    "sha256": "9dda9282fefa510f8711fc26c315e5dd87e8bcca281e9791294af534673024db"
+  },
+  {
+    "project": "Academy",
+    "path": "database/migrations/2026_10_18_000002_create_sketchup_device_requests_table.php",
+    "original_sha256": null,
+    "sha256": "d65546e2da95771db49a4a4f7a2ece54840e0fd0873ea557e194888f6321e51c"
+  },
+  {
+    "project": "Academy",
+    "path": "resources/views/Admin/users/index.blade.php",
+    "original_sha256": "60906e9350a1348f8fbd4ad668b246d039d005dbd45b60480b33ed486cb28d8f",
+    "sha256": "8c4846b3ae4995b3cf3c67f79c3fad71cbd152e3d117fe4d6bcfb09761d291ce"
+  },
+  {
+    "project": "Academy",
+    "path": "resources/views/Admin/users/sketchup.blade.php",
+    "original_sha256": null,
+    "sha256": "a8d5267962da4edfa78dba7c069c103edff6a07c3f13920a0afd6f5477faa94b"
+  },
+  {
+    "project": "Academy",
+    "path": "resources/views/index.blade.php",
+    "original_sha256": "7d27a82efbb30b589dfde39119d32875048aa93aa86a9ecf3176ba4ab5d35344",
+    "sha256": "dacacf8186fa044efd2d1be6f75ca640fe70c6da47d0a8d4017ce0296cd58c0a"
+  },
+  {
+    "project": "Academy",
+    "path": "resources/views/sketchup/approved.blade.php",
+    "original_sha256": null,
+    "sha256": "0dc321cb3fc0f39aed7c648321168b41e960ffa8f7d81ea73e884919637a158e"
+  },
+  {
+    "project": "Academy",
+    "path": "resources/views/sketchup/authorize.blade.php",
+    "original_sha256": null,
+    "sha256": "7c35b43219b4142544ddd147a2362b827f52d869d8e65eba49bb19e601b3f80a"
+  },
+  {
+    "project": "Academy",
+    "path": "routes/api.php",
+    "original_sha256": "c9354cd45aaf03966ab169f34b35e1d0bc66b8f22ba0c61d487abcc26ba67481",
+    "sha256": "3fe08defd60a25ee4f1f9153b779a5a76e25fbec74e53e3228fd915f85a45d8d"
+  },
+  {
+    "project": "Academy",
+    "path": "routes/web.php",
+    "original_sha256": "c42ba28649c97671ac4b0cce9b50962ae878dfe4a231890006a5a184ba3e1bae",
+    "sha256": "5929d3876831604b1f76095209fbbac08044568db21b2303afa4f7cd8cad398b"
+  },
+  {
+    "project": "Academy",
+    "path": "tests/Feature/SketchupAuthTest.php",
+    "original_sha256": null,
+    "sha256": "bab1822a8e033e654245e2a63f3246d6e3b347220d0fac88d92e66a468d34077"
+  },
+  {
+    "project": "Academy",
+    "path": "tests/Feature/SketchupDownloadTest.php",
+    "original_sha256": null,
+    "sha256": "efda0b9f3d4eeb9cee03f9fd4f156937cfb9e61967d5a3f489d9aecaed573332"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/auth_config.json",
+    "original_sha256": null,
+    "sha256": "6f8b04e126d0d2b3d529218f75711c75627a575028705f817977bd51c4da4b30"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/core/auth.rb",
+    "original_sha256": null,
+    "sha256": "8dabf1a4d2f021a24d02ea4a946785a0cce7a67b6fd8d6b90b6d1f022dd3b86c"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/core/auth_guards.rb",
+    "original_sha256": null,
+    "sha256": "699e8f12c439798e27289960a91bb45e43bb79aee8913c2cb3d96e30e193712c"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/core/credential_store.rb",
+    "original_sha256": null,
+    "sha256": "ca456d9c0a69c84ea3de968433d4a5c7e2bc00dce49cd1f1d3efe98e4c171a0d"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/main.rb",
+    "original_sha256": "d88b4c01ce03752d679a5c6222f1e66b08878527617c9b55428a7a51e462b509",
+    "sha256": "889ff1dc6906653d45248dbfcaf28dae8c1f9d06fd15e24898f399884be95831"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/ui/app.js",
+    "original_sha256": "41643278dbaf204b4e8e9e44b280d950090e9a10751e6032aa875d34b6f55adb",
+    "sha256": "d9f66eeeac99d839986a506d8b87c2fc701a050b4d7c592790dbce1a6e6f0dcd"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/ui/app.legacy.js",
+    "original_sha256": "c523fc4884540246e08dc219b08411c645e1f54eb6a5877caf3c10702045b35a",
+    "sha256": "19fa183da157c5cf623ae0f4d341e767be2dcb0cda233ec22bc412ac4b89f0ff"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/ui/index.html",
+    "original_sha256": "23166259de3782171b0819b46dc0a03d966ee1f8a8f144c08d17166d831807a3",
+    "sha256": "0b99a64a68661a5f92a818c5f18968d7dbdb0449791b4d775feba08c4a5074f8"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools/ui/style.css",
+    "original_sha256": "3982993b80f4708194fc438468de103c812988635ea5883e59054ccf54b3a97d",
+    "sha256": "09ef434bcec43f1977f004cd0d4aea0be650f74c711637b965e296b34728533a"
+  },
+  {
+    "project": "SketchUp",
+    "path": "tot_tools.rb",
+    "original_sha256": "b5f562eedeba08489b5e397705e9529468479fc2d5697118adef62bb1ed2b23e",
+    "sha256": "1abb39257b43590d91673a78a6ad0f23e0e17451b6a0e3cfd171ae7455078fa7"
+  }
+]

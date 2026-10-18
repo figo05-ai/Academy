@@ -82,6 +82,7 @@
                                             data-user-email="{{ $user->email }}">
                                         <i class="fa-solid fa-pen"></i> تعديل
                                     </button>
+                                    <a href="{{ route('admin.users.sketchup.edit', $user) }}" class="px-3 py-1.5 rounded-lg border font-semibold text-sm">ترخيص SketchUp — المكتب الفني</a>
                                     <button class="btn-maxtree-license px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-white border border-amber-500/30 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2"
                                             data-user-id="{{ $user->id }}"
                                             data-user-name="{{ $user->name }}">
