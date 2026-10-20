@@ -1,2 +1,6 @@
 *
 !.gitignore
+!sketchup/
+!sketchup/**
+!maxtree/
+!maxtree/**
