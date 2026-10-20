@@ -36,4 +36,12 @@ class SketchupDownloadTest extends TestCase {
         config(['sketchup.release_sha256'=>hash('sha256','approved fixture')]);
         $this->get('/sketchup/download')->assertDownload(Release::RELEASE_FILENAME);
     }
+    public function test_real_packaged_release_matches_configured_hash(): void {
+        if (! Storage::disk('public')->exists(Release::RELATIVE_STORAGE_PATH)) {
+            $this->markTestSkipped('Real release file not present.');
+        }
+        $response = $this->get('/sketchup/download');
+        $response->assertOk();
+        $response->assertDownload(Release::RELEASE_FILENAME);
+    }
 }

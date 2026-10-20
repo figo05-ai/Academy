@@ -13,7 +13,7 @@
 
 1. خذ نسخة احتياطية للملفات وقاعدة البيانات. راجع integration-docs/Academy_SketchUp.patch ثم ادمج الملفات، خاصة routes وUser وindex.blade.php، إذا كانت نسخة الموقع الحي تغيرت منذ نسخة J:\Academy.
 2. احتفظ بملف .env وقاعدة البيانات وملفات المستخدمين وstorage الموجودين على الخادم. لا تستبدلها ولا تعِد تهيئة الجداول.
-3. ملف الإضافة موجود داخل الحزمة في storage/app/public/sketchup/releases/Technical_Office_Tools_v0.6.2.rbz. ارفعه كما هو دون فك أو تعديل محتوياته. بصمته مضمنة افتراضيًا في config/sketchup.php، فلا يلزم متغير بيئة جديد. إذا كان SKETCHUP_RELEASE_SHA256 موجودًا بقيمة قديمة أو فارغة، حدّثه من ملف المثال المرفق أو أزله لاستخدام القيمة الافتراضية.
+3. ملف الإضافة موجود داخل الحزمة في storage/app/public/sketchup/releases/Technical_Office_Tools_v0.6.7.rbz.zip. ارفعه كما هو دون فك أو تعديل محتوياته. بصمته مضمنة افتراضيًا في config/sketchup.php، فلا يلزم متغير بيئة جديد. إذا كان SKETCHUP_RELEASE_SHA256 موجودًا بقيمة قديمة أو فارغة، حدّثه من ملف المثال المرفق أو أزله لاستخدام القيمة الافتراضية.
 4. على staging أولًا، شغّل php artisan migrate --pretend وراجع المهاجرات المعلقة. التحديث يضيف جدولَي sketchup_licenses وsketchup_device_requests فقط؛ لا تستخدم migrate:fresh أو refresh. نفّذ المهاجرات بعد مراجعتها وفق سياسة نشر المشروع.
 5. ابنِ أصول الواجهة باستخدام npm ci ثم npm run build وفق بيئة المشروع، وارفع public/build الناتج عند البناء خارج الخادم. لا تغيّر إصدارات الاعتماديات.
 6. امسح cache القديم باستخدام php artisan optimize:clear، ثم أعد إنشاء cache وفق إجراءات الموقع المعتادة. تأكد من صلاحية الكتابة لـstorage وbootstrap/cache ومن HTTPS وAPP_URL وإعداد trusted proxies الصحيح.

@@ -6,19 +6,32 @@ use Illuminate\Support\Facades\Storage;
 
 class SketchupDownloadController extends Controller
 {
-    public const CURRENT_VERSION = '0.6.2';
-    public const RELEASE_FILENAME = 'Technical_Office_Tools_v0.6.2.rbz';
-    public const RELATIVE_STORAGE_PATH = 'sketchup/releases/Technical_Office_Tools_v0.6.2.rbz';
+    public const CURRENT_VERSION = '0.6.7';
+    public const RELEASE_FILENAME = 'Technical_Office_Tools_v0.6.7.rbz.zip';
+    public const RELATIVE_STORAGE_PATH = 'sketchup/releases/Technical_Office_Tools_v0.6.7.rbz.zip';
 
     public function download()
     {
         $disk = Storage::disk('public');
         $storagePath = self::RELATIVE_STORAGE_PATH;
         if (! $disk->exists($storagePath)) {
-            if ($disk->exists('sketchup/' . self::RELEASE_FILENAME)) {
-                $storagePath = 'sketchup/' . self::RELEASE_FILENAME;
-            } elseif ($disk->exists(self::RELEASE_FILENAME)) {
-                $storagePath = self::RELEASE_FILENAME;
+            $altFilename = str_ends_with(self::RELEASE_FILENAME, '.zip')
+                ? substr(self::RELEASE_FILENAME, 0, -4)
+                : self::RELEASE_FILENAME . '.zip';
+
+            $candidates = [
+                'sketchup/releases/' . $altFilename,
+                'sketchup/' . self::RELEASE_FILENAME,
+                'sketchup/' . $altFilename,
+                self::RELEASE_FILENAME,
+                $altFilename,
+            ];
+
+            foreach ($candidates as $candidate) {
+                if ($disk->exists($candidate)) {
+                    $storagePath = $candidate;
+                    break;
+                }
             }
         }
 
