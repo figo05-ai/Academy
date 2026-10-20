@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MaxtreeDownloadController extends Controller
 {
@@ -19,7 +19,7 @@ class MaxtreeDownloadController extends Controller
     /**
      * Download the published Maxtree Tool Windows EXE Installer.
      *
-     * @return BinaryFileResponse|\Illuminate\Http\RedirectResponse
+     * @return StreamedResponse|\Illuminate\Http\RedirectResponse
      */
     public function download()
     {

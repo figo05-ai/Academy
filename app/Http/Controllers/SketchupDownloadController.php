@@ -13,10 +13,20 @@ class SketchupDownloadController extends Controller
     public function download()
     {
         $disk = Storage::disk('public');
-        abort_unless($disk->exists(self::RELATIVE_STORAGE_PATH), 404, 'ملف الإضافة غير متاح حاليًا.');
+        $storagePath = self::RELATIVE_STORAGE_PATH;
+        if (! $disk->exists($storagePath)) {
+            if ($disk->exists('sketchup/' . self::RELEASE_FILENAME)) {
+                $storagePath = 'sketchup/' . self::RELEASE_FILENAME;
+            } elseif ($disk->exists(self::RELEASE_FILENAME)) {
+                $storagePath = self::RELEASE_FILENAME;
+            }
+        }
+
+        abort_unless($disk->exists($storagePath), 404, 'ملف الإضافة غير متاح حاليًا.');
+
         $expected = config('sketchup.release_sha256');
         abort_unless(is_string($expected) && preg_match('/\A[a-f0-9]{64}\z/i', $expected), 503, 'النسخة المحمية قيد التجهيز.');
-        $stream = $disk->readStream(self::RELATIVE_STORAGE_PATH);
+        $stream = $disk->readStream($storagePath);
         abort_unless(is_resource($stream), 503);
         try {
             $hash = hash_init('sha256');
@@ -25,7 +35,8 @@ class SketchupDownloadController extends Controller
         } finally {
             fclose($stream);
         }
-        return $disk->download(self::RELATIVE_STORAGE_PATH, self::RELEASE_FILENAME, [
+
+        return $disk->download($storagePath, self::RELEASE_FILENAME, [
             'Content-Type' => 'application/octet-stream',
         ]);
     }

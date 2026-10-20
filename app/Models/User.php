@@ -22,6 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_active
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $courses
  * @property-read \App\Models\MaxtreeLicense|null $maxtreeLicense
+ * @property-read \App\Models\SketchupLicense|null $sketchupLicense
  * @property-read object{is_completed?: bool, status?: string}|null $pivot
  */
 #[Fillable(['name', 'email', 'password', 'is_admin', 'is_active', 'google_id'])]

@@ -7,6 +7,7 @@ use Illuminate\Routing\Controller;
 class AdminSketchupLicenseController extends Controller {
     public function getSketchupLicense(User $user): JsonResponse
     {
+        /** @var \App\Models\SketchupLicense|null $license */
         $license = $user->sketchupLicense;
 
         return response()->json([
@@ -48,6 +49,7 @@ class AdminSketchupLicenseController extends Controller {
 
         $expiresAt = ! empty($validated['expires_at']) ? \Illuminate\Support\Carbon::parse($validated['expires_at']) : null;
 
+        /** @var \App\Models\SketchupLicense $license */
         $license = $user->sketchupLicense()->updateOrCreate(
             ['user_id' => $user->id],
             [

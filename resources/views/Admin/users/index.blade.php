@@ -29,6 +29,7 @@
                         <th class="px-6 py-4 text-text-secondary font-bold">البريد الإلكتروني</th>
                         <th class="px-6 py-4 text-text-secondary font-bold">الكورسات</th>
                         <th class="px-6 py-4 text-text-secondary font-bold">ترخيص Maxtree</th>
+                        <th class="px-6 py-4 text-text-secondary font-bold">ترخيص SketchUp</th>
                         <th class="px-6 py-4 text-text-secondary font-bold">حالة الحساب</th>
                         <th class="px-6 py-4 text-text-secondary font-bold">تحكم</th>
                     </tr>
@@ -65,6 +66,25 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-6 py-4 sketchup-status-cell">
+                                @if ($user->sketchupLicense && $user->sketchupLicense->is_active && ($user->sketchupLicense->expires_at === null || $user->sketchupLicense->expires_at->isFuture()))
+                                    <span class="px-3 py-1 bg-green-500/10 text-green-700 border border-green-500/30 rounded-lg font-bold text-xs inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-check-circle"></i> نشط
+                                    </span>
+                                @elseif ($user->sketchupLicense && $user->sketchupLicense->is_active && $user->sketchupLicense->expires_at && $user->sketchupLicense->expires_at->isPast())
+                                    <span class="px-3 py-1 bg-red-500/10 text-red-700 border border-red-500/30 rounded-lg font-bold text-xs inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-clock"></i> منتهي
+                                    </span>
+                                @elseif ($user->sketchupLicense && !$user->sketchupLicense->is_active)
+                                    <span class="px-3 py-1 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-lg font-bold text-xs inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-ban"></i> معطل
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 bg-gray-500/10 text-text-secondary border border-gray-500/30 rounded-lg font-bold text-xs inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-minus"></i> بدون ترخيص
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4">
                                 <button class="btn-toggle-status flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-sm transition-colors border {{ $user->is_active ? 'bg-green-500/10 text-green-700 border-green-500/30 hover:bg-green-500 hover:text-white' : 'bg-gray-500/10 text-text-secondary border-gray-500/30 hover:bg-text-secondary hover:text-text-primary' }}" data-user-id="{{ $user->id }}">
                                     @if ($user->is_active)
@@ -82,7 +102,11 @@
                                             data-user-email="{{ $user->email }}">
                                         <i class="fa-solid fa-pen"></i> تعديل
                                     </button>
-                                    <a href="{{ route('admin.users.sketchup.edit', $user) }}" class="px-3 py-1.5 rounded-lg border font-semibold text-sm">ترخيص SketchUp — المكتب الفني</a>
+                                    <button class="btn-sketchup-license px-3 py-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-500/30 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2"
+                                            data-user-id="{{ $user->id }}"
+                                            data-user-name="{{ $user->name }}">
+                                        <i class="fa-solid fa-cube"></i> ترخيص SketchUp
+                                    </button>
                                     <button class="btn-maxtree-license px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-white border border-amber-500/30 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2"
                                             data-user-id="{{ $user->id }}"
                                             data-user-name="{{ $user->name }}">
@@ -102,7 +126,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-text-secondary font-bold">
+                            <td colspan="7" class="px-6 py-12 text-center text-text-secondary font-bold">
                                 <i class="fa-solid fa-users-slash text-4xl mb-4 opacity-50 block"></i>
                                 لا يوجد مستخدمين لعرضهم حالياً.
                             </td>
@@ -201,6 +225,62 @@
     </div>
 </div>
 
+<!-- SketchUp Tool License Modal -->
+<div id="sketchup-license-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm modal-bg"></div>
+    <div class="relative bg-bg-card border border-rose-500/30 rounded-2xl w-full max-w-lg p-6 md:p-8 shadow-2xl modal-content transform scale-95 opacity-0 transition-all duration-300">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-glass-border">
+            <h3 class="text-xl font-bold text-rose-500 flex items-center gap-2">
+                <i class="fa-solid fa-cube"></i> ترخيص أداة SketchUp — المكتب الفني
+            </h3>
+            <button type="button" class="close-modal text-text-muted hover:text-red-700 transition-colors text-2xl">&times;</button>
+        </div>
+
+        <div class="mb-6 p-4 bg-black/40 border border-glass-border rounded-xl flex items-center justify-between">
+            <div>
+                <p class="text-xs text-text-secondary font-semibold">المستخدم الحالي</p>
+                <p id="sketchup-modal-user-name" class="font-bold text-text-primary text-base"></p>
+                <p id="sketchup-modal-user-email" class="text-xs text-text-muted"></p>
+            </div>
+        </div>
+
+        <form id="sketchup-license-form" class="space-y-5">
+            @csrf
+            @method('PUT')
+
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-text-secondary">حالة تفعيل ترخيص SketchUp</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center justify-center gap-2 p-3 bg-black/40 border border-glass-border rounded-xl cursor-pointer hover:border-green-500/50 has-[:checked]:bg-green-500/20 has-[:checked]:border-green-500 transition-all">
+                        <input type="radio" name="is_active" value="1" id="sketchup-radio-active" class="accent-green-500">
+                        <span class="font-bold text-sm text-green-500"><i class="fa-solid fa-circle-check"></i> مُفعّل (Active)</span>
+                    </label>
+                    <label class="flex items-center justify-center gap-2 p-3 bg-black/40 border border-glass-border rounded-xl cursor-pointer hover:border-red-500/50 has-[:checked]:bg-red-500/20 has-[:checked]:border-red-500 transition-all">
+                        <input type="radio" name="is_active" value="0" id="sketchup-radio-inactive" class="accent-red-500">
+                        <span class="font-bold text-sm text-red-400"><i class="fa-solid fa-circle-xmark"></i> معطّل (Inactive)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="sketchup-expires-at" class="block text-sm font-bold text-text-secondary">تاريخ انتهاء الصلاحية</label>
+                <input type="datetime-local" id="sketchup-expires-at" name="expires_at" class="w-full px-4 py-3 bg-black/40 border border-glass-border rounded-xl text-text-primary focus:border-rose-500 transition-colors">
+                <p class="text-xs text-text-muted">اتركه فارغاً لمنح ترخيص دائم (Lifetime Access).</p>
+            </div>
+
+            <div class="space-y-2">
+                <label for="sketchup-notes" class="block text-sm font-bold text-text-secondary">ملاحظات الإدارة (اختياري)</label>
+                <textarea id="sketchup-notes" name="notes" rows="3" class="w-full px-4 py-3 bg-black/40 border border-glass-border rounded-xl text-text-primary focus:border-rose-500 transition-colors" placeholder="ملاحظات حول ترخيص SketchUp والتفعيل..."></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-glass-border">
+                <button type="button" class="px-6 py-2.5 bg-transparent border border-glass-border text-text-secondary font-bold rounded-xl hover:bg-glass-bg transition-colors close-modal">إلغاء</button>
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-br from-rose-500 to-rose-600 text-white font-black rounded-xl hover:-translate-y-1 transition-all shadow-lg hover:shadow-rose-500/20">حفظ الترخيص</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Courses Modal -->
 <div id="courses-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm modal-bg"></div>
@@ -262,6 +342,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const maxtreeLicenseModal = document.getElementById('maxtree-license-modal');
     const maxtreeLicenseForm = document.getElementById('maxtree-license-form');
+    const sketchupLicenseModal = document.getElementById('sketchup-license-modal');
+    const sketchupLicenseForm = document.getElementById('sketchup-license-form');
 
     let currentUserId = null;
 
@@ -294,6 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 closeModal(modal);
                 closeModal(editUserModal);
                 closeModal(maxtreeLicenseModal);
+                closeModal(sketchupLicenseModal);
             }
         });
     });
@@ -324,6 +407,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('maxtree-notes').value = data.license && data.license.notes ? data.license.notes : '';
 
                 openModal(maxtreeLicenseModal);
+            })
+            .catch(console.error);
+        }
+
+        if (e.target.closest('.btn-sketchup-license')) {
+            const button = e.target.closest('.btn-sketchup-license');
+            currentUserId = button.dataset.userId;
+            document.getElementById('sketchup-modal-user-name').textContent = button.dataset.userName;
+            document.getElementById('sketchup-modal-user-email').textContent = '';
+            sketchupLicenseForm.action = `/admin/users/${currentUserId}/sketchup-license`;
+
+            fetch(`/admin/users/${currentUserId}/sketchup-license`, {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('sketchup-modal-user-name').textContent = data.user.name;
+                document.getElementById('sketchup-modal-user-email').textContent = data.user.email;
+
+                if (data.license && data.license.is_active) {
+                    document.getElementById('sketchup-radio-active').checked = true;
+                } else {
+                    document.getElementById('sketchup-radio-inactive').checked = true;
+                }
+
+                document.getElementById('sketchup-expires-at').value = data.license && data.license.expires_at ? data.license.expires_at : '';
+                document.getElementById('sketchup-notes').value = data.license && data.license.notes ? data.license.notes : '';
+
+                openModal(sketchupLicenseModal);
             })
             .catch(console.error);
         }
@@ -443,6 +555,35 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.success) {
                 showToast(data.success);
                 closeModal(maxtreeLicenseModal);
+                setTimeout(() => window.location.reload(), 1200);
+            } else {
+                Swal.fire({
+                    title: 'خطأ في حفظ الترخيص',
+                    text: data.message || (data.errors ? Object.values(data.errors).join('\n') : 'حدث خطأ غير متوقع.'),
+                    icon: 'error',
+                    background: '#0e1426',
+                    color: '#edf2ff'
+                });
+            }
+        })
+        .catch(console.error);
+    });
+
+    sketchupLicenseForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.success);
+                closeModal(sketchupLicenseModal);
                 setTimeout(() => window.location.reload(), 1200);
             } else {
                 Swal.fire({

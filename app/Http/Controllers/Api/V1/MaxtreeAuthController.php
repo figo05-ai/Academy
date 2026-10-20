@@ -105,6 +105,7 @@ class MaxtreeAuthController extends Controller
         }
 
         // Always query the fresh license record from the database to prevent stale cache evaluation
+        /** @var \App\Models\MaxtreeLicense|null $license */
         $license = $user->maxtreeLicense()->first();
 
         if (! $license) {

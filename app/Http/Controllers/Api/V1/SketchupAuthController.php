@@ -46,15 +46,16 @@ class SketchupAuthController extends Controller {
         abort_unless($request->isSecure(),400);
         $user=$request->user();
         if ($error=$licenses->error($user)) return $this->reply(['authorized'=>false,'error_code'=>$error],403);
+        /** @var \App\Models\SketchupLicense|null $license */
         $license=$user->sketchupLicense()->first();
         $token=$user->currentAccessToken();
         $deadline=now()->addSeconds(config('sketchup.lease_seconds'));
-        foreach ([$license->expires_at,$token->expires_at,config('sanctum.expiration') ? $token->created_at->addMinutes(config('sanctum.expiration')) : null] as $expiry) {
+        foreach ([$license?->expires_at,$token->expires_at,config('sanctum.expiration') ? $token->created_at->addMinutes(config('sanctum.expiration')) : null] as $expiry) {
             if ($expiry && $expiry->lessThan($deadline)) $deadline=$expiry;
         }
         return $this->reply(['authorized'=>true,'product'=>'technical-office-sketchup',
             'lease_seconds'=>max(0,(int) now()->diffInSeconds($deadline,false)),
-            'user'=>['name'=>$user->name],'expires_at'=>$license->expires_at?->toIso8601String()]);
+            'user'=>['name'=>$user->name],'expires_at'=>$license?->expires_at?->toIso8601String()]);
     }
     public function logout(Request $request) {
         abort_unless($request->isSecure(),400);

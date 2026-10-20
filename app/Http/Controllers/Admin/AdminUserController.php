@@ -68,6 +68,7 @@ class AdminUserController extends Controller
      */
     public function getMaxtreeLicense(User $user): JsonResponse
     {
+        /** @var \App\Models\MaxtreeLicense|null $license */
         $license = $user->maxtreeLicense;
 
         return response()->json([
@@ -82,7 +83,7 @@ class AdminUserController extends Controller
                 'is_active' => (bool) $license->is_active,
                 'expires_at' => $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : null,
                 'notes' => $license->notes,
-                'created_at' => $license->created_at ? $license->created_at->format('Y-m-d H:i') : null,
+                'created_at' => $license->created_at->format('Y-m-d H:i'),
             ] : null,
         ]);
     }
@@ -109,6 +110,7 @@ class AdminUserController extends Controller
 
         $expiresAt = ! empty($validated['expires_at']) ? \Illuminate\Support\Carbon::parse($validated['expires_at']) : null;
 
+        /** @var \App\Models\MaxtreeLicense $license */
         $license = $user->maxtreeLicense()->updateOrCreate(
             ['user_id' => $user->id],
             [

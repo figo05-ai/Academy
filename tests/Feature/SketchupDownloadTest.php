@@ -23,4 +23,17 @@ class SketchupDownloadTest extends TestCase {
         config(['sketchup.release_sha256'=>hash('sha256','approved fixture')]);
         $this->get('/sketchup/download')->assertDownload(Release::RELEASE_FILENAME);
     }
+    public function test_api_download_route_downloads_package(): void {
+        Storage::fake('public');
+        Storage::disk('public')->put(Release::RELATIVE_STORAGE_PATH,'approved fixture');
+        config(['sketchup.release_sha256'=>hash('sha256','approved fixture')]);
+        $this->get('/api/v1/sketchup/download')->assertDownload(Release::RELEASE_FILENAME);
+        $this->get('/api/sketchup/download')->assertDownload(Release::RELEASE_FILENAME);
+    }
+    public function test_fallback_storage_path_downloads_package(): void {
+        Storage::fake('public');
+        Storage::disk('public')->put('sketchup/'.Release::RELEASE_FILENAME,'approved fixture');
+        config(['sketchup.release_sha256'=>hash('sha256','approved fixture')]);
+        $this->get('/sketchup/download')->assertDownload(Release::RELEASE_FILENAME);
+    }
 }
