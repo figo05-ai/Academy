@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -7,13 +7,17 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # ---------------------------------------------------------
+  # Job 1: CI - Security Scanning and Image Building
+  # ---------------------------------------------------------
   security-and-build:
+    name: Security Scan and Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy Vulnerability Scanner (Repository Files)
+      - name: Run Trivy Scanner (Filesystem)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -21,14 +25,52 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
-      - name: Build Application Docker Image
-        run: |
-          docker build -t academy-app:latest -f docker/app/Dockerfile .
+      - name: Build Production Docker Image
+        run: docker build -t academy-app:latest -f docker/app/Dockerfile .
 
-      - name: Run Trivy Vulnerability Scanner (Docker Image)
+      - name: Run Trivy Scanner (Docker Image)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'academy-app:latest'
           format: 'table'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+
+  # ---------------------------------------------------------
+  # Job 2: CD - Automated Deployment to AWS EC2
+  # ---------------------------------------------------------
+  deploy:
+    name: Deploy to Production (AWS EC2)
+    needs: security-and-build
+    runs-on: ubuntu-latest
+    # Execute deployment only when pushing to the main branch
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Execute Deployment Script via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Define the project directory on the target server
+            # NOTE: Modify '/home/ubuntu/Academy' if the path differs on your EC2 instance
+            PROJECT_DIR="/home/ubuntu/Academy"
+            
+            echo "--> Navigating to project directory"
+            cd "$PROJECT_DIR" || exit 1
+            
+            echo "--> Pulling latest source code from GitHub"
+            git pull origin main
+            
+            echo "--> Building new Docker images for production"
+            docker compose -f docker-compose.prod.yml build
+            
+            echo "--> Starting containers in detached mode"
+            docker compose -f docker-compose.prod.yml up -d
+            
+            echo "--> Removing dangling Docker images to optimize storage"
+            docker image prune -f
+            
+            echo "--> Deployment sequence completed."
