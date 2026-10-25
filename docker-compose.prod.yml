@@ -8,6 +8,7 @@ services:
     working_dir: /var/www
     volumes:
       - shared_public:/var/www/public
+      - ./.env:/var/www/.env
     networks:
       - academy_network
 
@@ -59,6 +60,8 @@ services:
     command: php artisan queue:work --verbose --tries=3 --timeout=90
     depends_on:
       - redis
+    volumes:
+      - ./.env:/var/www/.env
     networks:
       - academy_network
 
