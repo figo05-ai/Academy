@@ -71,5 +71,7 @@ networks:
 
 volumes:
   academy_db_data:
+    driver: local
   academy_redis_data:
+    driver: local
   shared_public:
