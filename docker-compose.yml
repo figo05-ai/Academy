@@ -1,5 +1,4 @@
 services:
-  # PHP Application Service
   app:
     build:
       context: .
@@ -12,7 +11,6 @@ services:
     networks:
       - academy_network
 
-  # Nginx Web Server Service
   nginx:
     image: nginx:alpine
     container_name: academy_nginx
@@ -29,7 +27,6 @@ services:
     networks:
       - academy_network
 
-  # MySQL Database Service
   db:
     image: mysql:8.0
     container_name: academy_db
@@ -44,7 +41,6 @@ services:
     networks:
       - academy_network
 
-  # Redis Service
   redis:
     image: redis:alpine
     container_name: academy_redis
@@ -54,7 +50,6 @@ services:
     networks:
       - academy_network
 
-  # Queue Worker Service
   worker:
     build:
       context: .
