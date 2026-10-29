@@ -66,11 +66,16 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
+            echo "--> Stopping any conflicting dev containers"
+            docker compose -f docker-compose.yml down 2>/dev/null || true
+            docker stop academy_nginx 2>/dev/null || true
+            docker rm academy_nginx 2>/dev/null || true
+
             echo "--> Building new Docker images for production"
             docker compose -f docker-compose.prod.yml build
             
-            echo "--> Starting containers in detached mode"
-            docker compose -f docker-compose.prod.yml up -d
+            echo "--> Starting production containers in detached mode"
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
             
             echo "--> Running database migrations"
             docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force || true
