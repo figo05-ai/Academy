@@ -8,10 +8,21 @@ use Illuminate\Support\Facades\DB;
 
 class AutocadAuthorizationController extends Controller
 {
+    /**
+     * Validate and normalize the 10-hex-character user code.
+     */
     private function code(Request $request): string
     {
-        abort_unless($request->isSecure() || app()->environment('local', 'testing'), 400);
-        return $request->validate(['code' => ['required', 'regex:/\A[A-F0-9]{10}\z/']])['code'];
+        $isLocal = app()->environment('local', 'testing')
+            || ! app()->environment('production')
+            || in_array($request->getHost(), ['localhost', '127.0.0.1', '::1', '10.0.2.2']);
+
+        abort_unless($request->isSecure() || $isLocal, 400);
+
+        $code = strtoupper(trim((string) $request->input('code', '')));
+        abort_unless(preg_match('/\A[A-F0-9]{10}\z/', $code), 400);
+
+        return $code;
     }
 
     public function show(Request $request)

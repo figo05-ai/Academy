@@ -58,8 +58,8 @@ Route::prefix('v1/autocad')->group(function () {
         ->middleware('throttle:5,1');
 
     Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class, 'throttle:120,1'])->group(function () {
-        Route::get('/license/status', [AutocadAuthController::class, 'status']);
-        Route::post('/auth/logout', [AutocadAuthController::class, 'logout']);
+        Route::match(['get', 'post'], '/license/status', [AutocadAuthController::class, 'status']);
+        Route::match(['get', 'post'], '/auth/logout', [AutocadAuthController::class, 'logout']);
     });
 });
 
@@ -73,8 +73,8 @@ Route::prefix('v1/maktabat')->group(function () {
         ->middleware('throttle:5,1');
 
     Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class, 'throttle:120,1'])->group(function () {
-        Route::get('/license/status', [AutocadAuthController::class, 'status']);
-        Route::post('/auth/logout', [AutocadAuthController::class, 'logout']);
+        Route::match(['get', 'post'], '/license/status', [AutocadAuthController::class, 'status']);
+        Route::match(['get', 'post'], '/auth/logout', [AutocadAuthController::class, 'logout']);
     });
 });
 

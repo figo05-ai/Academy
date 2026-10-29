@@ -5,8 +5,9 @@
 !maxtree/
 !maxtree/**
 !Maktabat/
-!Maktabat/**
+!Maktabat/*.exe
 !maktabat/
-!maktabat/**
+!maktabat/*.exe
 !autocad/
-!autocad/**
+!autocad/*.exe
+

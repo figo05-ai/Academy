@@ -23,16 +23,35 @@ class AutocadAuthController extends Controller
     }
 
     /**
+     * Check if request is secure or running in a local/testing/development environment.
+     */
+    protected function isConnectionAllowed(Request $request): bool
+    {
+        return $request->isSecure()
+            || app()->environment('local', 'testing')
+            || ! app()->environment('production')
+            || in_array($request->getHost(), ['localhost', '127.0.0.1', '::1', '10.0.2.2']);
+    }
+
+    /**
      * Start device pairing flow for AutoCAD plugin.
      */
     public function start(Request $request): JsonResponse
     {
-        abort_unless($request->isSecure() || app()->environment('local', 'testing'), 400);
+        abort_unless($this->isConnectionAllowed($request), 400);
 
-        $data = $request->validate([
-            'challenge' => ['required', 'regex:/\A[a-f0-9]{64}\z/'],
-            'remember' => ['required', 'boolean'],
-        ]);
+        // Accept challenge in snake_case, camelCase, or PascalCase (C# client compatibility)
+        $challenge = (string) ($request->input('challenge') ?? $request->input('Challenge'));
+        $remember = $request->input('remember') ?? $request->input('Remember', false);
+        $remember = filter_var($remember, FILTER_VALIDATE_BOOLEAN);
+
+        if (! preg_match('/\A[a-f0-9]{64}\z/i', $challenge)) {
+            return $this->reply([
+                'status' => 'error',
+                'error_code' => 'VALIDATION_ERROR',
+                'message' => 'The challenge must be a 64-character hexadecimal SHA-256 string.',
+            ], 422);
+        }
 
         $device = bin2hex(random_bytes(32));
         $code = strtoupper(bin2hex(random_bytes(5)));
@@ -40,19 +59,28 @@ class AutocadAuthController extends Controller
         DB::table('autocad_device_requests')->insert([
             'device_hash' => hash('sha256', $device),
             'code_hash' => hash('sha256', $code),
-            'challenge' => $data['challenge'],
-            'remember' => $data['remember'],
+            'challenge' => strtolower($challenge),
+            'remember' => $remember,
             'expires_at' => now()->addMinutes(config('autocad.device_minutes', 5)),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
+        $verificationUri = route('autocad.authorize', ['code' => $code]);
+
+        if (! app()->environment('testing')) {
+            if (str_contains($request->getHost(), 'the-technical-office-for-landscaping-works.com') || app()->environment('production')) {
+                $verificationUri = 'https://the-technical-office-for-landscaping-works.com/autocad/authorize?code=' . $code;
+            }
+        }
+
         return $this->reply([
+            'status' => 'success',
             'device_code' => $device,
             'user_code' => $code,
             'interval' => 5,
             'expires_in' => config('autocad.device_minutes', 5) * 60,
-            'verification_uri' => route('autocad.authorize', ['code' => $code]),
+            'verification_uri' => $verificationUri,
         ]);
     }
 
@@ -61,20 +89,29 @@ class AutocadAuthController extends Controller
      */
     public function exchange(Request $request): JsonResponse
     {
-        abort_unless($request->isSecure() || app()->environment('local', 'testing'), 400);
+        abort_unless($this->isConnectionAllowed($request), 400);
 
-        $data = $request->validate([
-            'device_code' => ['required', 'regex:/\A[a-f0-9]{64}\z/'],
-            'verifier' => ['required', 'regex:/\A[a-f0-9]{64}\z/'],
-        ]);
+        $deviceCode = (string) ($request->input('device_code') ?? $request->input('deviceCode') ?? $request->input('DeviceCode'));
+        $verifier = (string) ($request->input('verifier') ?? $request->input('Verifier'));
 
-        return DB::transaction(function () use ($data) {
+        if (! preg_match('/\A[a-f0-9]{64}\z/i', $deviceCode) || ! preg_match('/\A[a-f0-9]{64}\z/i', $verifier)) {
+            return $this->reply([
+                'status' => 'error',
+                'error_code' => 'VALIDATION_ERROR',
+                'message' => 'Invalid device code or verifier format.',
+            ], 422);
+        }
+
+        $deviceCode = strtolower($deviceCode);
+        $verifier = strtolower($verifier);
+
+        return DB::transaction(function () use ($deviceCode, $verifier) {
             $row = DB::table('autocad_device_requests')
-                ->where('device_hash', hash('sha256', $data['device_code']))
+                ->where('device_hash', hash('sha256', $deviceCode))
                 ->lockForUpdate()
                 ->first();
 
-            if (! $row || $row->consumed_at || Carbon::parse($row->expires_at)->lessThanOrEqualTo(now()) || ! hash_equals($row->challenge, hash('sha256', $data['verifier']))) {
+            if (! $row || $row->consumed_at || Carbon::parse($row->expires_at)->lessThanOrEqualTo(now()) || ! hash_equals($row->challenge, hash('sha256', $verifier))) {
                 return $this->reply(['error_code' => 'DEVICE_EXPIRED'], 400);
             }
 
@@ -106,16 +143,29 @@ class AutocadAuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        // Support snake_case, camelCase, and PascalCase from C# / .NET clients
+        $email = (string) ($request->input('email') ?? $request->input('Email'));
+        $password = (string) ($request->input('password') ?? $request->input('Password'));
 
-        $user = User::where('email', $credentials['email'])->first();
+        $email = strtolower(trim($email));
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        if (empty($email) || empty($password)) {
             return $this->reply([
                 'status' => 'error',
+                'error_code' => 'VALIDATION_ERROR',
+                'message' => 'Email and password are required.',
+            ], 422);
+        }
+
+        // Case-insensitive user lookup
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first()
+            ?? User::where('email', $email)->first();
+
+        if (! $user || ! Hash::check($password, $user->password)) {
+            return $this->reply([
+                'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'INVALID_CREDENTIALS',
                 'message' => 'The provided credentials do not match our records.',
             ], 401);
@@ -124,6 +174,8 @@ class AutocadAuthController extends Controller
         if (! $user->is_active) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'ACCOUNT_DISABLED',
                 'message' => 'Your account is disabled.',
             ], 403);
@@ -134,6 +186,8 @@ class AutocadAuthController extends Controller
         if (! $license) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'LICENSE_NOT_FOUND',
                 'message' => 'No AutoCAD license record found for this account.',
             ], 403);
@@ -142,6 +196,8 @@ class AutocadAuthController extends Controller
         if (! $license->is_active) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'LICENSE_INACTIVE',
                 'message' => 'Your AutoCAD license is inactive.',
             ], 403);
@@ -150,6 +206,8 @@ class AutocadAuthController extends Controller
         if ($license->expires_at !== null && $license->expires_at->isPast()) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'LICENSE_EXPIRED',
                 'message' => 'Your AutoCAD license has expired.',
             ], 403);
@@ -160,6 +218,9 @@ class AutocadAuthController extends Controller
 
         return $this->reply([
             'status' => 'success',
+            'authorized' => true,
+            'is_licensed' => true,
+            'is_active' => true,
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in_days' => 30,
@@ -185,6 +246,8 @@ class AutocadAuthController extends Controller
         if (! $user || ! $user->is_active) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'ACCOUNT_DISABLED',
                 'message' => 'Your account is disabled.',
             ], 403);
@@ -196,6 +259,8 @@ class AutocadAuthController extends Controller
         if (! $license) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'LICENSE_NOT_FOUND',
                 'message' => 'No AutoCAD license record found for this account.',
             ], 403);
@@ -204,6 +269,8 @@ class AutocadAuthController extends Controller
         if (! $license->is_active) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'LICENSE_INACTIVE',
                 'message' => 'Your AutoCAD license is inactive.',
             ], 403);
@@ -212,6 +279,8 @@ class AutocadAuthController extends Controller
         if ($license->expires_at !== null && $license->expires_at->isPast()) {
             return $this->reply([
                 'status' => 'error',
+                'authorized' => false,
+                'is_licensed' => false,
                 'error_code' => 'LICENSE_EXPIRED',
                 'message' => 'Your AutoCAD license has expired.',
             ], 403);
@@ -229,8 +298,10 @@ class AutocadAuthController extends Controller
         return $this->reply([
             'status' => 'success',
             'authorized' => true,
+            'is_licensed' => true,
+            'is_active' => (bool) $license->is_active,
             'product' => 'technical-office-autocad',
-            'lease_seconds' => max(0, (int) now()->diffInSeconds($deadline, false)),
+            'lease_seconds' => max(1, min(30, (int) now()->diffInSeconds($deadline, false))),
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -262,3 +333,4 @@ class AutocadAuthController extends Controller
         ], 200);
     }
 }
+

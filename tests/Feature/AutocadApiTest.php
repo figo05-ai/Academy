@@ -326,4 +326,52 @@ class AutocadApiTest extends TestCase
                 'product' => 'technical-office-autocad',
             ]);
     }
+
+    public function test_autocad_login_supports_pascal_case_and_case_insensitive_email(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'designer@academy.com',
+            'password' => Hash::make('StrongPass123!'),
+            'is_active' => true,
+        ]);
+
+        AutocadLicense::create([
+            'user_id' => $user->id,
+            'is_active' => true,
+        ]);
+
+        // Test with PascalCase payload and mixed-case email (common in C# .NET HTTP clients)
+        $response = $this->postJson('/api/v1/autocad/auth/login', [
+            'Email' => 'DeSiGnEr@Academy.COM',
+            'Password' => 'StrongPass123!',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'authorized' => true,
+                'is_licensed' => true,
+            ]);
+        $this->assertNotEmpty($response->json('token'));
+    }
+
+    public function test_autocad_license_status_supports_both_get_and_post(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        AutocadLicense::create(['user_id' => $user->id, 'is_active' => true]);
+
+        $token = $user->createToken('autocad-plugin-token', ['autocad:access'])->plainTextToken;
+
+        // POST request to /license/status
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/v1/autocad/license/status');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'authorized' => true,
+                'is_licensed' => true,
+            ]);
+    }
 }
+

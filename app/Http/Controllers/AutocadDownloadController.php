@@ -122,20 +122,51 @@ class AutocadDownloadController extends Controller
             }
 
             foreach ($subFolders as $subFolder) {
-                $dir = $subFolder !== '' ? rtrim($rootDir, '/') . '/' . $subFolder : $rootDir;
+                $dir = $subFolder !== '' ? rtrim($rootDir, '/\\') . DIRECTORY_SEPARATOR . $subFolder : $rootDir;
+
+                // If exact directory does not exist, try case-insensitive folder match on Linux
+                if (! is_dir($dir) && $subFolder !== '') {
+                    $parent = rtrim($rootDir, '/\\');
+                    if (is_dir($parent)) {
+                        $entries = @scandir($parent) ?: [];
+                        foreach ($entries as $entry) {
+                            if ($entry === '.' || $entry === '..') continue;
+                            if (strcasecmp($entry, $subFolder) === 0 && is_dir($parent . DIRECTORY_SEPARATOR . $entry)) {
+                                $dir = $parent . DIRECTORY_SEPARATOR . $entry;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 if (! is_dir($dir)) {
                     continue;
                 }
 
+                // 1. Check exact filenames
                 foreach ($fileNames as $fileName) {
-                    $fullPath = $dir . '/' . $fileName;
+                    $fullPath = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $fileName;
                     if (is_file($fullPath) && file_exists($fullPath)) {
                         return $fullPath;
                     }
                 }
 
-                // Glob for any *.exe file in Maktabat / maktabat / autocad directory as a fallback
-                $exeMatches = glob($dir . '/*.exe');
+                // 2. Check case-insensitive filenames in directory
+                $entries = @scandir($dir) ?: [];
+                foreach ($entries as $entry) {
+                    if ($entry === '.' || $entry === '..') continue;
+                    foreach ($fileNames as $fileName) {
+                        if (strcasecmp($entry, $fileName) === 0) {
+                            $fullPath = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $entry;
+                            if (is_file($fullPath) && file_exists($fullPath)) {
+                                return $fullPath;
+                            }
+                        }
+                    }
+                }
+
+                // 3. Glob for any *.exe file in Maktabat / maktabat / autocad directory as a fallback
+                $exeMatches = glob(rtrim($dir, '/\\') . '/*.exe') ?: [];
                 if (! empty($exeMatches)) {
                     foreach ($exeMatches as $exePath) {
                         if (is_file($exePath) && file_exists($exePath)) {
