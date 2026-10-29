@@ -262,4 +262,68 @@ class AutocadApiTest extends TestCase
                 'error_code' => 'UNAUTHORIZED',
             ]);
     }
+
+    public function test_autocad_device_flow_pairing_and_exchange(): void
+    {
+        $verifier = bin2hex(random_bytes(32));
+        $challenge = hash('sha256', $verifier);
+
+        $startRes = $this->postJson('https://localhost/api/v1/autocad/auth/device', [
+            'challenge' => $challenge,
+            'remember' => true,
+        ]);
+
+        $startRes->assertStatus(200)
+            ->assertJsonStructure(['device_code', 'user_code', 'interval', 'expires_in', 'verification_uri']);
+
+        $deviceCode = $startRes->json('device_code');
+        $userCode = $startRes->json('user_code');
+
+        // Poll before approval -> 202 AUTHORIZATION_PENDING
+        $pollPending = $this->postJson('https://localhost/api/v1/autocad/auth/exchange', [
+            'device_code' => $deviceCode,
+            'verifier' => $verifier,
+        ]);
+        $pollPending->assertStatus(202)->assertJson(['error_code' => 'AUTHORIZATION_PENDING']);
+
+        // User logs in and approves on web
+        $user = User::factory()->create(['is_active' => true]);
+        AutocadLicense::create(['user_id' => $user->id, 'is_active' => true]);
+
+        $this->actingAs($user)
+            ->get('/autocad/authorize?code=' . $userCode)
+            ->assertStatus(200)
+            ->assertSee($userCode);
+
+        $this->actingAs($user)
+            ->post('/autocad/authorize', ['code' => $userCode])
+            ->assertStatus(200)
+            ->assertSee('تمت الموافقة');
+
+        // Exchange succeeds after approval
+        $exchangeRes = $this->postJson('https://localhost/api/v1/autocad/auth/exchange', [
+            'device_code' => $deviceCode,
+            'verifier' => $verifier,
+        ]);
+
+        $exchangeRes->assertStatus(200)
+            ->assertJsonStructure(['status', 'token', 'token_type', 'expires_at'])
+            ->assertJson(['status' => 'success']);
+
+        $token = $exchangeRes->json('token');
+        $this->assertNotEmpty($token);
+
+        // Reset web session guard so Sanctum evaluates the bearer token cleanly
+        auth()->forgetGuards();
+
+        // Status check with issued token
+        $statusRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('https://localhost/api/v1/autocad/license/status');
+
+        $statusRes->assertStatus(200)
+            ->assertJson([
+                'authorized' => true,
+                'product' => 'technical-office-autocad',
+            ]);
+    }
 }

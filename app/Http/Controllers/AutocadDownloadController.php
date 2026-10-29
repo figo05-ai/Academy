@@ -11,9 +11,9 @@ class AutocadDownloadController extends Controller
     /**
      * Constant specifying the current published release version and filename.
      */
-    public const CURRENT_VERSION = '3.1.0';
-    public const RELEASE_FILENAME = 'Maktabat_Office_Setup_2020-2027.exe';
-    public const RELATIVE_STORAGE_PATH = 'Maktabat/Maktabat_Office_Setup_2020-2027.exe';
+    public const CURRENT_VERSION = '3.2.0';
+    public const RELEASE_FILENAME = 'Maktabat_Office_Setup_3.2.0_Licensed.exe';
+    public const RELATIVE_STORAGE_PATH = 'Maktabat/Maktabat_Office_Setup_3.2.0_Licensed.exe';
 
     /**
      * Download the published AutoCAD Tool / Maktabat Office Windows EXE Installer.
@@ -27,11 +27,13 @@ class AutocadDownloadController extends Controller
 
         if (! $disk->exists($storagePath)) {
             $candidates = [
+                'Maktabat/' . self::RELEASE_FILENAME,
                 'autocad/releases/' . self::RELEASE_FILENAME,
                 'maktabat/releases/' . self::RELEASE_FILENAME,
                 'maktabat/' . self::RELEASE_FILENAME,
                 'autocad/' . self::RELEASE_FILENAME,
                 self::RELEASE_FILENAME,
+                'Maktabat/Maktabat_Office_Setup_2020-2027.exe',
             ];
 
             foreach ($candidates as $candidate) {

@@ -51,10 +51,13 @@ Route::prefix('v1/sketchup')->group(function () {
 Route::prefix('v1/autocad')->group(function () {
     Route::get('/download', [AutocadDownloadController::class, 'download'])->name('api.v1.autocad.download');
 
+    Route::post('/auth/device', [AutocadAuthController::class, 'start'])->middleware('throttle:10,1');
+    Route::post('/auth/exchange', [AutocadAuthController::class, 'exchange'])->middleware('throttle:30,1');
+
     Route::post('/auth/login', [AutocadAuthController::class, 'login'])
         ->middleware('throttle:5,1');
 
-    Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class])->group(function () {
+    Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class, 'throttle:120,1'])->group(function () {
         Route::get('/license/status', [AutocadAuthController::class, 'status']);
         Route::post('/auth/logout', [AutocadAuthController::class, 'logout']);
     });
@@ -63,10 +66,13 @@ Route::prefix('v1/autocad')->group(function () {
 Route::prefix('v1/maktabat')->group(function () {
     Route::get('/download', [AutocadDownloadController::class, 'download'])->name('api.v1.maktabat.download');
 
+    Route::post('/auth/device', [AutocadAuthController::class, 'start'])->middleware('throttle:10,1');
+    Route::post('/auth/exchange', [AutocadAuthController::class, 'exchange'])->middleware('throttle:30,1');
+
     Route::post('/auth/login', [AutocadAuthController::class, 'login'])
         ->middleware('throttle:5,1');
 
-    Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class])->group(function () {
+    Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class, 'throttle:120,1'])->group(function () {
         Route::get('/license/status', [AutocadAuthController::class, 'status']);
         Route::post('/auth/logout', [AutocadAuthController::class, 'logout']);
     });

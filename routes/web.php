@@ -37,6 +37,8 @@ Route::get('/maktabat/download', [\App\Http\Controllers\AutocadDownloadControlle
 Route::middleware('auth')->group(function () {
     Route::get('/sketchup/authorize', [\App\Http\Controllers\SketchupAuthorizationController::class, 'show'])->name('sketchup.authorize');
     Route::post('/sketchup/authorize', [\App\Http\Controllers\SketchupAuthorizationController::class, 'approve'])->middleware('throttle:10,1')->name('sketchup.approve');
+    Route::get('/autocad/authorize', [\App\Http\Controllers\AutocadAuthorizationController::class, 'show'])->name('autocad.authorize');
+    Route::post('/autocad/authorize', [\App\Http\Controllers\AutocadAuthorizationController::class, 'approve'])->middleware('throttle:10,1')->name('autocad.approve');
 });
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/admin/users/{user}/sketchup-license/edit', fn (\App\Models\User $user) => view('Admin.users.sketchup', compact('user')))->name('admin.users.sketchup.edit');
