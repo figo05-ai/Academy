@@ -10,7 +10,7 @@ class UserService
 {
     public function UserIndex(array $data)
     {
-        $query = User::query()->with(['courses', 'maxtreeLicense', 'sketchupLicense'])->where('is_admin', false);
+        $query = User::query()->with(['courses', 'maxtreeLicense', 'sketchupLicense', 'autocadLicense'])->where('is_admin', false);
 
         if (! empty($data['search'])) {
             $search = $data['search'];

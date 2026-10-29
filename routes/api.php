@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AutocadAuthController;
 use App\Http\Controllers\Api\V1\MaxtreeAuthController;
+use App\Http\Controllers\AutocadDownloadController;
 use App\Http\Controllers\MaxtreeDownloadController;
 use App\Http\Controllers\SketchupDownloadController;
+use App\Http\Middleware\EnsureAutocadTokenAbility;
 use App\Http\Middleware\EnsureMaxtreeTokenAbility;
 use Illuminate\Support\Facades\Route;
 
@@ -39,7 +42,40 @@ Route::prefix('v1/sketchup')->group(function () {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| AutoCAD / Maktabat Office Tools API Routes (V1)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('v1/autocad')->group(function () {
+    Route::get('/download', [AutocadDownloadController::class, 'download'])->name('api.v1.autocad.download');
+
+    Route::post('/auth/login', [AutocadAuthController::class, 'login'])
+        ->middleware('throttle:5,1');
+
+    Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class])->group(function () {
+        Route::get('/license/status', [AutocadAuthController::class, 'status']);
+        Route::post('/auth/logout', [AutocadAuthController::class, 'logout']);
+    });
+});
+
+Route::prefix('v1/maktabat')->group(function () {
+    Route::get('/download', [AutocadDownloadController::class, 'download'])->name('api.v1.maktabat.download');
+
+    Route::post('/auth/login', [AutocadAuthController::class, 'login'])
+        ->middleware('throttle:5,1');
+
+    Route::middleware(['auth:sanctum', EnsureAutocadTokenAbility::class])->group(function () {
+        Route::get('/license/status', [AutocadAuthController::class, 'status']);
+        Route::post('/auth/logout', [AutocadAuthController::class, 'logout']);
+    });
+});
+
 // Top-level API download aliases
 Route::get('/sketchup/download', [SketchupDownloadController::class, 'download'])->name('api.sketchup.download');
 Route::get('/maxtree/download', [MaxtreeDownloadController::class, 'download'])->name('api.maxtree.download');
+Route::get('/autocad/download', [AutocadDownloadController::class, 'download'])->name('api.autocad.download');
+Route::get('/maktabat/download', [AutocadDownloadController::class, 'download'])->name('api.maktabat.download');
+
 

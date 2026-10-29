@@ -752,6 +752,11 @@
                     class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
                     مكتبة أدوات الاسكتش اب
                 </button>
+                <button type="button" @click="selectedTool = 'autocad'" :aria-pressed="selectedTool === 'autocad'"
+                    :class="selectedTool === 'autocad' ? 'bg-gradient-to-br from-gold-light to-gold text-text-primary' : 'bg-bg-card border border-glass-border text-text-secondary'"
+                    class="w-full md:w-auto px-8 py-3 rounded-full font-bold transition-all duration-300">
+                    مكتبة أدوات الأوتوكاد
+                </button>
             </div>
             <div x-show="selectedTool === 'maxtree'" class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
                 <div class="absolute -top-24 -right-24 w-60 h-60 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -828,6 +833,59 @@
                     <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">البرنامج</span><strong class="text-text-primary">SketchUp</strong></div>
                     <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">صيغة الإضافة</span><strong class="text-text-primary">RBZ</strong></div>
                     <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border"><span class="block text-xs text-text-muted mb-1">التشغيل</span><strong class="text-text-primary">حساب وترخيص مفعّل</strong></div>
+                </div>
+            </div>
+            <div x-show="selectedTool === 'autocad'" style="display: none;"
+                class="max-w-4xl mx-auto bg-bg-card border border-glass-border rounded-3xl p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-center relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-bold mb-6"
+                    style="background-color: rgba(201,150,58,0.15); border: 1px solid rgba(201,150,58,0.3); color: #4a662e;">
+                    <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: #10b981;"></span>
+                    Autodesk AutoCAD Plugin
+                </div>
+                
+                <h3 class="text-3xl md:text-5xl font-black text-text-primary mb-6">
+                    <span style="color: #c9963a;">مكتبة أدوات الأوتوكاد</span>
+                </h3>
+                
+                <p class="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+                    مكتبة أدوات المكتب الفني لبرنامج Autodesk AutoCAD: حصر وتوصيف النباتات، إدراج البلوكات، إدارة جداول الكميات، ومقاييس الهاتش الذكية.
+                </p>
+                
+                <!-- Download Action Button -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                    <a href="{{ route('autocad.download') }}"
+                        class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-download"></i>
+                        تحميل مكتبة أدوات الأوتوكاد (Windows EXE)
+                    </a>
+                </div>
+                
+                <p class="text-text-secondary leading-relaxed mb-8">
+                    مثبت واحد متكامل لجميع إصدارات AutoCAD من 2020 إلى 2027 (Win64). أغلق البرنامج وشغّل المثبت، ثم افتح AutoCAD واكتب الأمر <span class="font-mono text-gold-light font-bold">MOT</span>.
+                    تشغيل وترخيص الأدوات يتطلب تفعيل ترخيص AutoCAD لحسابك من الإدارة.
+                </p>
+                
+                <!-- Technical Metadata Badge Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-sm text-text-secondary border-t border-glass-border pt-6">
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border">
+                        <span class="block text-xs text-text-muted mb-1">الإصدار الحالي</span>
+                        <strong class="text-text-primary">v{{ \App\Http\Controllers\AutocadDownloadController::CURRENT_VERSION }}</strong>
+                    </div>
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border">
+                        <span class="block text-xs text-text-muted mb-1">نظام التشغيل</span>
+                        <strong class="text-text-primary">Windows 64-bit</strong>
+                    </div>
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border">
+                        <span class="block text-xs text-text-muted mb-1">إصدارات AutoCAD</span>
+                        <strong class="text-text-primary">2020 - 2027</strong>
+                    </div>
+                    <div class="p-3 bg-bg-secondary/50 rounded-2xl border border-glass-border">
+                        <span class="block text-xs text-text-muted mb-1">حجم الملف</span>
+                        <strong class="text-text-primary">~22 MB</strong>
+                    </div>
                 </div>
             </div>
         </div>

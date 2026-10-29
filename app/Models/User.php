@@ -23,6 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $courses
  * @property-read \App\Models\MaxtreeLicense|null $maxtreeLicense
  * @property-read \App\Models\SketchupLicense|null $sketchupLicense
+ * @property-read \App\Models\AutocadLicense|null $autocadLicense
  * @property-read object{is_completed?: bool, status?: string}|null $pivot
  */
 #[Fillable(['name', 'email', 'password', 'is_admin', 'is_active', 'google_id'])]
@@ -65,5 +66,10 @@ class User extends Authenticatable
     public function maxtreeLicense(): HasOne
     {
         return $this->hasOne(MaxtreeLicense::class);
+    }
+
+    public function autocadLicense(): HasOne
+    {
+        return $this->hasOne(AutocadLicense::class);
     }
 }

@@ -30,6 +30,10 @@ Route::get('/', function () {
 // Maxtree Tool Installer Public Download Route
 Route::get('/maxtree/download', [MaxtreeDownloadController::class, 'download'])->name('maxtree.download');
 
+// AutoCAD Tool Installer Public Download Routes
+Route::get('/autocad/download', [\App\Http\Controllers\AutocadDownloadController::class, 'download'])->name('autocad.download');
+Route::get('/maktabat/download', [\App\Http\Controllers\AutocadDownloadController::class, 'download'])->name('maktabat.download');
+
 Route::middleware('auth')->group(function () {
     Route::get('/sketchup/authorize', [\App\Http\Controllers\SketchupAuthorizationController::class, 'show'])->name('sketchup.authorize');
     Route::post('/sketchup/authorize', [\App\Http\Controllers\SketchupAuthorizationController::class, 'approve'])->middleware('throttle:10,1')->name('sketchup.approve');
@@ -38,6 +42,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/admin/users/{user}/sketchup-license/edit', fn (\App\Models\User $user) => view('Admin.users.sketchup', compact('user')))->name('admin.users.sketchup.edit');
     Route::get('/admin/users/{user}/sketchup-license', [\App\Http\Controllers\Admin\AdminSketchupLicenseController::class, 'getSketchupLicense'])->name('admin.users.sketchup.get');
     Route::put('/admin/users/{user}/sketchup-license', [\App\Http\Controllers\Admin\AdminSketchupLicenseController::class, 'updateSketchupLicense'])->name('admin.users.sketchup.update');
+    Route::get('/admin/users/{user}/autocad-license', [\App\Http\Controllers\Admin\AdminAutocadLicenseController::class, 'getAutocadLicense'])->name('admin.users.autocad.get');
+    Route::put('/admin/users/{user}/autocad-license', [\App\Http\Controllers\Admin\AdminAutocadLicenseController::class, 'updateAutocadLicense'])->name('admin.users.autocad.update');
 });
 
 Route::get('/sketchup/download', [\App\Http\Controllers\SketchupDownloadController::class, 'download'])->name('sketchup.download');
