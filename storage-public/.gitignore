@@ -1,0 +1,12 @@
+*
+!.gitignore
+!sketchup/
+!sketchup/**
+!maxtree/
+!maxtree/**
+!Maktabat/
+!Maktabat/**
+!maktabat/
+!maktabat/**
+!autocad/
+!autocad/**

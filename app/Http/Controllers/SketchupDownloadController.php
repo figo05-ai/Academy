@@ -35,6 +35,30 @@ class SketchupDownloadController extends Controller
             }
         }
 
+        if (! $disk->exists($storagePath) && ! app()->environment('testing')) {
+            $rootCandidates = array_unique(array_filter([
+                storage_path('app/public'),
+                base_path('storage-public'),
+                base_path('storage/app/public'),
+                public_path('storage'),
+                '/var/www/storage-public',
+                '/var/www/storage/app/public',
+            ]));
+
+            foreach ($rootCandidates as $rootDir) {
+                $candidatePath = rtrim($rootDir, '/') . '/sketchup/releases/' . self::RELEASE_FILENAME;
+                if (file_exists($candidatePath)) {
+                    $targetDir = dirname($disk->path(self::RELATIVE_STORAGE_PATH));
+                    if (! is_dir($targetDir)) {
+                        @mkdir($targetDir, 0775, true);
+                    }
+                    @copy($candidatePath, $disk->path(self::RELATIVE_STORAGE_PATH));
+                    $storagePath = self::RELATIVE_STORAGE_PATH;
+                    break;
+                }
+            }
+        }
+
         abort_unless($disk->exists($storagePath), 404, 'ملف الإضافة غير متاح حاليًا.');
 
         $expected = config('sketchup.release_sha256');

@@ -2,8 +2,8 @@
 
 @section('content')
     <div x-data="{
-        activeTab: 3,
-        selectedTool: 'maxtree',
+        activeTab: {{ (int) request()->query('tab', session('active_tab', 3)) }},
+        selectedTool: '{{ e(request()->query('tool', session('selected_tool', 'maxtree'))) }}',
         showLoginModal: false,
         showSubscribeModal: false,
         selectedCourseId: null,
@@ -22,6 +22,19 @@
             }
         }
     }" class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+
+        @if (session('error'))
+            <div class="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-center text-sm md:text-base font-bold flex items-center justify-center gap-3 shadow-lg">
+                <i class="fa-solid fa-circle-exclamation text-lg"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+        @if (session('success'))
+            <div class="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-center text-sm md:text-base font-bold flex items-center justify-center gap-3 shadow-lg">
+                <i class="fa-solid fa-circle-check text-lg"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
 
         <!-- Tabs Navigation -->
         <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-12">
@@ -779,6 +792,7 @@
                 <!-- Download Action Button -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                     <a href="{{ route('maxtree.download') }}"
+                        download="Maxtree_Setup_3.3.1_x64.exe"
                         class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-download"></i>
                         تحميل مكتبة بلوكات الماكس (Windows EXE)
@@ -819,6 +833,7 @@
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                     <a href="{{ route('sketchup.download') }}"
+                        download="Technical_Office_Tools_v0.6.7.rbz.zip"
                         class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-download"></i>
                         تحميل مكتبة أدوات الاسكتش اب (RBZ)
@@ -857,6 +872,7 @@
                 <!-- Download Action Button -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                     <a href="{{ route('autocad.download') }}"
+                        download="Maktabat_Office_Setup_3.2.0_Licensed.exe"
                         class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-download"></i>
                         تحميل مكتبة أدوات الأوتوكاد (Windows EXE)

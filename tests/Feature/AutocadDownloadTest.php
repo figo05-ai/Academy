@@ -75,6 +75,32 @@ class AutocadDownloadTest extends TestCase
         $response->assertSessionHas('error');
     }
 
+    public function test_autocad_download_resolves_from_candidate_subpaths(): void
+    {
+        Storage::fake('public');
+
+        // Test with Maktabat/ prefixed candidate
+        $fakeContent = 'MZ' . str_repeat("\x90", 50);
+        Storage::disk('public')->put('maktabat/' . AutocadDownloadController::RELEASE_FILENAME, $fakeContent);
+
+        $response = $this->get(route('autocad.download'));
+        $response->assertStatus(200);
+        $this->assertTrue(
+            str_contains($response->headers->get('Content-Disposition'), AutocadDownloadController::RELEASE_FILENAME)
+        );
+    }
+
+    public function test_autocad_download_missing_file_redirects_with_tab_and_tool_session(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->get(route('autocad.download'));
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $response->assertSessionHas('active_tab', 4);
+        $response->assertSessionHas('selected_tool', 'autocad');
+    }
+
     public function test_homepage_renders_autocad_tool_section_and_download_button(): void
     {
         $response = $this->get('/');
@@ -84,4 +110,13 @@ class AutocadDownloadTest extends TestCase
         $response->assertSee(route('autocad.download'));
         $response->assertSee('v' . AutocadDownloadController::CURRENT_VERSION);
     }
+
+    public function test_homepage_displays_error_alert_when_session_has_error(): void
+    {
+        $response = $this->withSession(['error' => 'AutoCAD Tool installer is currently unavailable for download.'])->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('AutoCAD Tool installer is currently unavailable for download.');
+    }
 }
+
