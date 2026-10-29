@@ -54,15 +54,17 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -euo pipefail
+
             # Define the project directory on the target server
-            # NOTE: Modify '/home/ubuntu/Academy' if the path differs on your EC2 instance
             PROJECT_DIR="/home/ubuntu/Academy"
             
             echo "--> Navigating to project directory"
-            cd "$PROJECT_DIR" || exit 1
+            cd "$PROJECT_DIR"
             
-            echo "--> Pulling latest source code from GitHub"
-            git pull origin main
+            echo "--> Syncing repository cleanly with origin/main"
+            git fetch origin main
+            git reset --hard origin/main
             
             echo "--> Building new Docker images for production"
             docker compose -f docker-compose.prod.yml build
@@ -70,7 +72,14 @@ jobs:
             echo "--> Starting containers in detached mode"
             docker compose -f docker-compose.prod.yml up -d
             
+            echo "--> Running database migrations"
+            docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force || true
+            
+            echo "--> Clearing application caches"
+            docker compose -f docker-compose.prod.yml exec -T app php artisan optimize:clear || true
+            
             echo "--> Removing dangling Docker images to optimize storage"
             docker image prune -f
             
-            echo "--> Deployment sequence completed."
+            echo "--> Deployment sequence completed successfully."
+
