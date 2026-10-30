@@ -2,89 +2,378 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  # ---------------------------------------------------------
-  # Job 1: CI - Security Scanning and Image Building
-  # ---------------------------------------------------------
+
+  # =========================================================
+  # JOB 1: CI - SECURITY SCANNING AND BUILD
+  # =========================================================
+
   security-and-build:
     name: Security Scan and Build
     runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
     steps:
+
+      # -----------------------------------------------------
+      # Checkout Repository
+      # -----------------------------------------------------
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # -----------------------------------------------------
+      # Trivy Filesystem Security Scan
+      # -----------------------------------------------------
+
       - name: Run Trivy Scanner (Filesystem)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
+          scan-ref: '.'
           ignore-unfixed: true
           format: 'table'
           severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      # -----------------------------------------------------
+      # Build Production Docker Image
+      # -----------------------------------------------------
 
       - name: Build Production Docker Image
-        run: docker build -t academy-app:latest -f docker/app/Dockerfile .
+        run: |
+          docker build \
+            -t academy-app:latest \
+            -f docker/app/Dockerfile .
+
+      # -----------------------------------------------------
+      # Trivy Docker Image Security Scan
+      # -----------------------------------------------------
 
       - name: Run Trivy Scanner (Docker Image)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
+          scan-type: 'image'
           image-ref: 'academy-app:latest'
           format: 'table'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+          exit-code: '0'
 
-  # ---------------------------------------------------------
-  # Job 2: CD - Automated Deployment to AWS EC2
-  # ---------------------------------------------------------
+
+  # =========================================================
+  # JOB 2: CD - DEPLOY TO AWS EC2
+  # =========================================================
+
   deploy:
     name: Deploy to Production (AWS EC2)
+
     needs: security-and-build
+
     runs-on: ubuntu-latest
-    # Execute deployment only when pushing to the main branch
-    if: github.ref == 'refs/heads/main'
-    
+
+    timeout-minutes: 45
+
+    # Deploy only after a push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # Prevent simultaneous production deployments
+    concurrency:
+      group: academy-production
+      cancel-in-progress: false
+
     steps:
+
+      # -----------------------------------------------------
+      # SSH Deployment
+      # -----------------------------------------------------
+
       - name: Execute Deployment Script via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.5
+
+        env:
+          DEPLOY_SHA: ${{ github.sha }}
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+
+          envs: DEPLOY_SHA
+
+          command_timeout: 30m
+
           script: |
-            set -euo pipefail
+            set -eu
 
-            # Define the project directory on the target server
+            # =============================================
+            # 1. Define Production Environment
+            # =============================================
+
             PROJECT_DIR="/home/ubuntu/Academy"
-            
-            echo "--> Navigating to project directory"
+            COMPOSE_FILE="docker-compose.prod.yml"
+
+            export DOCKER_HOST="unix:///run/docker.sock"
+
+            echo "========================================"
+            echo "Academy Production Deployment Started"
+            echo "========================================"
+
             cd "$PROJECT_DIR"
-            
-            echo "--> Syncing repository cleanly with origin/main"
+
+            # =============================================
+            # 2. Verify Correct Docker Daemon
+            # =============================================
+
+            echo "--> Checking Docker daemon"
+
+            DOCKER_ROOT=$(docker info --format '{{.DockerRootDir}}')
+
+            echo "Docker Root: $DOCKER_ROOT"
+
+            if [ "$DOCKER_ROOT" != "/var/lib/docker" ]; then
+              echo "ERROR: Wrong Docker daemon detected!"
+              echo "Expected Docker APT installation."
+              exit 1
+            fi
+
+            echo "Docker APT verified successfully."
+
+            # =============================================
+            # 3. Prevent Docker Snap Conflict
+            # =============================================
+
+            echo "--> Checking Docker Snap status"
+
+            if systemctl is-active --quiet snap.docker.dockerd; then
+              echo "ERROR: Docker Snap is running!"
+              echo "Deployment aborted to prevent conflicts."
+              exit 1
+            fi
+
+            echo "Docker Snap is not running."
+
+            # =============================================
+            # 4. Verify Production Dependencies
+            # =============================================
+
+            echo "--> Checking production dependencies"
+
+            for SERVICE in db redis; do
+
+              CONTAINER="academy_${SERVICE}_prod"
+
+              RUNNING=$(docker inspect \
+                --format '{{.State.Running}}' \
+                "$CONTAINER")
+
+              if [ "$RUNNING" != "true" ]; then
+                echo "ERROR: $CONTAINER is not running!"
+                exit 1
+              fi
+
+              echo "$CONTAINER is running."
+
+            done
+
+            # =============================================
+            # 5. Fetch Latest Repository Changes
+            # =============================================
+
+            echo "--> Fetching latest changes"
+
             git fetch origin main
-            git reset --hard origin/main
-            
-            echo "--> Stopping any conflicting dev containers"
-            docker compose -f docker-compose.yml down 2>/dev/null || true
-            docker stop academy_nginx 2>/dev/null || true
-            docker rm academy_nginx 2>/dev/null || true
 
-            echo "--> Building new Docker images for production"
-            docker compose -f docker-compose.prod.yml build
-            
-            echo "--> Starting production containers in detached mode"
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            
-            echo "--> Running database migrations"
-            docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force || true
-            
-            echo "--> Clearing application caches"
-            docker compose -f docker-compose.prod.yml exec -T app php artisan optimize:clear || true
-            
-            echo "--> Removing dangling Docker images to optimize storage"
-            docker image prune -f
-            
-            echo "--> Deployment sequence completed successfully."
+            # Protect tracked local changes
+            if ! git diff --quiet || ! git diff --cached --quiet; then
+              echo "ERROR: Uncommitted tracked changes detected."
+              echo "Deployment stopped to protect server files."
+              exit 1
+            fi
 
+            # Only allow fast-forward updates
+            git merge --ff-only "$DEPLOY_SHA"
+
+            CURRENT_SHA=$(git rev-parse HEAD)
+
+            if [ "$CURRENT_SHA" != "$DEPLOY_SHA" ]; then
+              echo "ERROR: Deployed commit mismatch."
+              exit 1
+            fi
+
+            echo "Repository synchronized successfully."
+            echo "Commit: $CURRENT_SHA"
+
+            # =============================================
+            # 6. Validate Production Docker Compose
+            # =============================================
+
+            echo "--> Validating production configuration"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              config -q
+
+            echo "Docker Compose configuration valid."
+
+            # =============================================
+            # 7. Build Application Images
+            # =============================================
+
+            echo "--> Building Laravel application and worker"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              build app worker
+
+            echo "Application images built successfully."
+
+            # =============================================
+            # 8. Update Laravel Application
+            # =============================================
+
+            echo "--> Updating Laravel application"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              up -d --no-deps app
+
+            echo "Laravel application updated."
+
+            # =============================================
+            # 9. Run Database Migrations
+            # =============================================
+
+            echo "--> Running Laravel database migrations"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              exec -T app \
+              php artisan migrate --force
+
+            echo "Database migrations completed."
+
+            # =============================================
+            # 10. Clear Laravel Caches
+            # =============================================
+
+            echo "--> Clearing Laravel caches"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              exec -T app \
+              php artisan optimize:clear
+
+            echo "Laravel caches cleared."
+
+            # =============================================
+            # 11. Update Queue Worker
+            # =============================================
+
+            echo "--> Updating Laravel queue worker"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              up -d --no-deps worker
+
+            echo "Laravel worker updated."
+
+            # =============================================
+            # 12. Ensure Nginx Is Running
+            # =============================================
+
+            echo "--> Checking Nginx"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              up -d --no-deps nginx
+
+            # Validate Nginx configuration
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              exec -T nginx nginx -t
+
+            # Reload Nginx configuration
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              exec -T nginx nginx -s reload
+
+            echo "Nginx configuration reloaded."
+
+            # =============================================
+            # 13. Verify Production Containers
+            # =============================================
+
+            echo "--> Checking production containers"
+
+            docker compose \
+              -f "$COMPOSE_FILE" \
+              ps
+
+            for SERVICE in app worker nginx db redis; do
+
+              CONTAINER="academy_${SERVICE}_prod"
+
+              RUNNING=$(docker inspect \
+                --format '{{.State.Running}}' \
+                "$CONTAINER")
+
+              if [ "$RUNNING" != "true" ]; then
+                echo "ERROR: $CONTAINER is not running!"
+                exit 1
+              fi
+
+              echo "$CONTAINER verified."
+
+            done
+
+            # =============================================
+            # 14. Verify Nginx Ports
+            # =============================================
+
+            echo "--> Checking Nginx port mappings"
+
+            docker port academy_nginx_prod 80/tcp \
+              | grep -q ':80$'
+
+            docker port academy_nginx_prod 443/tcp \
+              | grep -q ':443$'
+
+            echo "Ports 80 and 443 verified."
+
+            # =============================================
+            # 15. HTTPS Health Check
+            # =============================================
+
+            echo "--> Checking HTTPS response"
+
+            curl \
+              -k \
+              -f \
+              -sS \
+              --retry 3 \
+              --retry-delay 2 \
+              --max-time 15 \
+              -o /dev/null \
+              https://127.0.0.1/
+
+            echo "HTTPS health check passed."
+
+            # =============================================
+            # 16. Deployment Completed
+            # =============================================
+
+            echo "========================================"
+            echo "Academy Deployment Successful!"
+            echo "========================================"
