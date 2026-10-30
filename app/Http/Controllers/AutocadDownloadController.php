@@ -13,9 +13,9 @@ class AutocadDownloadController extends Controller
     /**
      * Constant specifying the current published release version and filename.
      */
-    public const CURRENT_VERSION = '3.2.0';
-    public const RELEASE_FILENAME = 'Maktabat_Office_Setup_3.2.0_Licensed.exe';
-    public const RELATIVE_STORAGE_PATH = 'Maktabat/Maktabat_Office_Setup_3.2.0_Licensed.exe';
+    public const CURRENT_VERSION = '3.2.1';
+    public const RELEASE_FILENAME = 'Maktabat_Office_Setup_3.2.1_Licensed.exe';
+    public const RELATIVE_STORAGE_PATH = 'Maktabat/Maktabat_Office_Setup_3.2.1_Licensed.exe';
 
     /**
      * Download the published AutoCAD Tool / Maktabat Office Windows EXE Installer.
@@ -77,6 +77,9 @@ class AutocadDownloadController extends Controller
             'maktabat/releases/' . self::RELEASE_FILENAME,
             'autocad/' . self::RELEASE_FILENAME,
             self::RELEASE_FILENAME,
+            'Maktabat/Maktabat_Office_Setup_3.2.1_Licensed.exe',
+            'Maktabat/Maktabat_Office_Setup_3.2.0_Licensed.exe',
+            'maktabat/Maktabat_Office_Setup_3.2.0_Licensed.exe',
             'Maktabat/Maktabat_Office_Setup_2020-2027.exe',
             'maktabat/Maktabat_Office_Setup_2020-2027.exe',
             'autocad/Maktabat_Office_Setup_2020-2027.exe',
@@ -112,6 +115,8 @@ class AutocadDownloadController extends Controller
         $subFolders = ['Maktabat', 'maktabat', 'autocad/releases', 'autocad', ''];
         $fileNames = [
             self::RELEASE_FILENAME,
+            'Maktabat_Office_Setup_3.2.1_Licensed.exe',
+            'Maktabat_Office_Setup_3.2.0_Licensed.exe',
             'Maktabat_Office_Setup_2020-2027.exe',
             'Maktabat_Office_Setup_3.2.0.exe',
         ];

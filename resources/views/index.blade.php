@@ -872,7 +872,7 @@
                 <!-- Download Action Button -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                     <a href="{{ route('autocad.download') }}"
-                        download="Maktabat_Office_Setup_3.2.0_Licensed.exe"
+                        download="Maktabat_Office_Setup_3.2.1_Licensed.exe"
                         class="w-full sm:w-auto px-10 py-4 bg-gradient-to-br from-gold-light to-gold text-text-primary text-xl font-black rounded-full shadow-[0_6px_25px_rgba(201,150,58,0.4)] hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-download"></i>
                         تحميل مكتبة أدوات الأوتوكاد (Windows EXE)
