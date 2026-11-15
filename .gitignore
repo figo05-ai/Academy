@@ -1,38 +1,298 @@
-*.log
-.DS_Store
+# ============================================================
+# ACADEMY - GIT IGNORE CONFIGURATION
+# Laravel 13 | Docker | Contabo Infrastructure
+# ============================================================
+
+
+# ============================================================
+# 1. ENVIRONMENT CONFIGURATION
+# ============================================================
+
 .env
-.env.backup
-.env.production
+.env.*
+**/.env
+**/.env.*
+
+# Allow environment templates
+!.env.example
+!**/.env.example
+
+
+# ============================================================
+# 2. SECRETS AND CREDENTIALS
+# ============================================================
+
+/auth.json
+**/auth.json
+
+.aws/
+**/.aws/
+
+.ssh/
+**/.ssh/
+
+.secrets/
+**/.secrets/
+
+private-keys/
+**/private-keys/
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+*.credentials.json
+*service-account*.json
+
+
+# ============================================================
+# 3. PHP AND COMPOSER DEPENDENCIES
+# ============================================================
+
+/vendor/
+/composer.phar
+
 .phpactor.json
 .phpunit.result.cache
-/.codex
-/.cursor/
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/fonts-manifest.dev.json
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
+.phpunit.cache/
+
+phpunit-watcher.yml
 _ide_helper.php
-Homestead.json
-Homestead.yaml
-Thumbs.db
-/bootstrap/cache/*.php
-=Z:/
-Maxtree_Tool.zip
+
+
+# ============================================================
+# 4. NODE.JS AND FRONTEND DEPENDENCIES
+# ============================================================
+
+/node_modules/
+
+.npm/
+.npm-cache/
+
+.yarn/cache/
+.yarn/unplugged/
+
+.pnpm-store/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# ============================================================
+# 5. FRONTEND BUILD OUTPUT
+# ============================================================
+
+/public/build/
+/public/hot
+/public/storage/
+
+/public/fonts-manifest.dev.json
+
 /dist/
+/coverage/
+
+*.tsbuildinfo
+
+
+# ============================================================
+# 6. LARAVEL RUNTIME FILES
+# ============================================================
+
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/framework/testing/
+
+/storage/logs/
+/storage/pail/
+
+/storage/app/private/
+
+/storage/*.key
+
+/bootstrap/cache/*.php
+
+
+# ============================================================
+# 7. DATABASE FILES
+# ============================================================
+
+/database/database.sqlite
+/database/database.sqlite-journal
+
+*.sqlite
+*.sqlite3
+
+*.sql.gz
+*.sql.bz2
+*.sql.xz
+
+*.dump
+*.bak.sql
+
+
+# ============================================================
+# 8. BACKUPS AND LOCAL EXPORTS
+# ============================================================
+
+/backups/
+/backup/
+/tmp/
+/temp/
+
+*.backup
+*.bak
+*.old
+
+*.tar.gz
+*.tgz
+
+*.restic
+
+*.backup.zip
+*_backup.zip
+
+
+# ============================================================
+# 9. APPLICATION LOGS
+# ============================================================
+
+*.log
+*.log.*
+
+/logs/
+**/logs/*.log
+
+
+# ============================================================
+# 10. DEVELOPMENT IDE FILES
+# ============================================================
+
+/.idea/
+/.vscode/
+/.cursor/
+/.codex/
+/.nova/
+/.zed/
+
+*.sublime-workspace
+*.sublime-project
+
+
+# ============================================================
+# 11. OPERATING SYSTEM FILES
+# ============================================================
+
+.DS_Store
+**/.DS_Store
+
+Thumbs.db
+**/Thumbs.db
+
+Desktop.ini
+
+*.swp
+*.swo
+*~
+
+=Z:/
+
+
+# ============================================================
+# 12. PYTHON CACHE
+# ============================================================
+
 __pycache__/
+**/__pycache__/
+
 *.pyc
-Maxtree_Tool/Maxtree_Tool/settings/jobs/
-Maxtree_Tool/Maxtree_Tool/settings/ui_validation/
-Maxtree_Tool/Maxtree_Tool/test_*.png
-Maxtree_Tool/Maxtree_Tool/test_*_results.json
-*.zip
+*.pyo
+
+.pytest_cache/
+.mypy_cache/
+
+.venv/
+venv/
+
+
+# ============================================================
+# 13. TEST AND CACHE ARTIFACTS
+# ============================================================
+
+.cache/
+**/.cache/
+
+.phpunit.cache/
+
+coverage.xml
+
+test-results/
+playwright-report/
+
+
+# ============================================================
+# 14. MAXTREE DEVELOPMENT ARTIFACTS
+# ============================================================
+
+/Maxtree_Tool.zip
+
+/Maxtree_Tool/Maxtree_Tool/settings/jobs/
+/Maxtree_Tool/Maxtree_Tool/settings/ui_validation/
+
+/Maxtree_Tool/Maxtree_Tool/test_*.png
+/Maxtree_Tool/Maxtree_Tool/test_*_results.json
+
+
+# ============================================================
+# 15. LOCAL DOCKER OVERRIDES
+# ============================================================
+
+docker-compose.override.yml
+docker-compose.local.yml
+docker-compose.dev.local.yml
+
+*.local.yml
+*.local.yaml
+
+
+# ============================================================
+# 16. LOCAL CONFIGURATION OVERRIDES
+# ============================================================
+
+*.local.php
+
+/config/local/
+/deployment/local/
+
+
+# ============================================================
+# 17. PRODUCTION FILES THAT MUST REMAIN TRACKED
+# ============================================================
+
+# Composer dependency lockfile
+!/composer.lock
+
+# Frontend dependency lockfile
+!/package-lock.json
+
+# Docker infrastructure
+!/docker-compose.yml
+!/docker-compose.prod.yml
+
+# Application configuration templates
+!/.env.example
+
+
+# ============================================================
+# END OF ACADEMY GITIGNORE
+# ============================================================
