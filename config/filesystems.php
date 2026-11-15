@@ -1,30 +1,5 @@
 <?php
 
-$contaboDisk = [
-    'driver' => 's3',
-
-    'key' => env('CONTABO_ACCESS_KEY'),
-    'secret' => env('CONTABO_SECRET_KEY'),
-
-    'region' => env('CONTABO_REGION', 'default'),
-
-    'bucket' => env('CONTABO_BUCKET'),
-
-    'url' => env('CONTABO_URL'),
-
-    'endpoint' => env('CONTABO_ENDPOINT'),
-
-    'use_path_style_endpoint' => env(
-        'CONTABO_USE_PATH_STYLE_ENDPOINT',
-        true
-    ),
-
-    'visibility' => env('CONTABO_VISIBILITY', 'private'),
-
-    'throw' => true,
-    'report' => true,
-];
-
 return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
@@ -48,10 +23,42 @@ return [
             'report' => false,
         ],
 
-        'contabo' => $contaboDisk,
+        's3' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'url' => env('AWS_URL'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+        ],
 
-        // Temporary compatibility alias for existing S3 references.
-        's3' => $contaboDisk,
+        'contabo' => [
+            'driver' => 's3',
+
+            'key' => env('CONTABO_ACCESS_KEY'),
+            'secret' => env('CONTABO_SECRET_KEY'),
+
+            'region' => env('CONTABO_REGION', 'default'),
+
+            'bucket' => env('CONTABO_BUCKET'),
+
+            'endpoint' => env('CONTABO_ENDPOINT'),
+            'url' => env('CONTABO_URL'),
+
+            'use_path_style_endpoint' => env(
+                'CONTABO_USE_PATH_STYLE_ENDPOINT',
+                true
+            ),
+
+            'visibility' => env('CONTABO_VISIBILITY', 'private'),
+
+            'throw' => true,
+            'report' => true,
+        ],
 
     ],
 
