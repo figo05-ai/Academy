@@ -1,13 +1,187 @@
+# ============================================================
+# ACADEMY - DOCKER BUILD CONTEXT SECURITY
+# Laravel 13 | PHP 8.3 | Contabo Infrastructure
+# ============================================================
+
+
+# ============================================================
+# 1. VERSION CONTROL AND CI/CD
+# ============================================================
+
 .git
 .github
+.gitignore
+
+**/.git
+**/.github
+
+
+# ============================================================
+# 2. DEVELOPMENT ENVIRONMENTS AND IDE FILES
+# ============================================================
+
 .idea
 .vscode
+.cursor
+.codex
+.nova
+.zed
+
+**/.idea
+**/.vscode
+**/.cursor
+
+.DS_Store
+Thumbs.db
+
+**/.DS_Store
+**/Thumbs.db
+
+
+# ============================================================
+# 3. ENVIRONMENT FILES AND SECRETS
+# ============================================================
+
 .env
-/vendor
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/framework
-/storage/logs
+.env.*
+**/.env
+**/.env.*
+
+!.env.example
+!**/.env.example
+
+**/.aws
+**/.ssh
+**/.secrets
+
+**/secrets
+**/secrets/**
+
+**/auth.json
+
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+
+**/id_rsa
+**/id_ed25519
+
+
+# ============================================================
+# 4. DEPENDENCIES
+# ============================================================
+
+vendor
+node_modules
+
+**/vendor
+**/node_modules
+
+
+# ============================================================
+# 5. FRONTEND GENERATED FILES
+# ============================================================
+
+public/build
+public/hot
+public/storage
+
+**/public/build
+**/public/hot
+**/public/storage
+
+
+# ============================================================
+# 6. LARAVEL RUNTIME FILES
+# ============================================================
+
+storage/framework
+storage/logs
+storage/pail
+
+**/storage/framework
+**/storage/framework/**
+**/storage/logs
+**/storage/logs/**
+**/storage/pail
+**/storage/pail/**
+
+bootstrap/cache/*.php
+
+
+# ============================================================
+# 7. DATABASE DUMPS AND BACKUPS
+# ============================================================
+
+backups
+**/backups
+**/backups/**
+
+**/*.sql
+**/*.sql.gz
+**/*.dump
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+
+
+# ============================================================
+# 8. TEMPORARY FILES AND LOGS
+# ============================================================
+
+**/*.log
+**/*.tmp
+**/*.temp
+**/*.swp
+**/*.swo
+**/*~
+
+.phpunit.cache
+.phpunit.result.cache
+
+**/.phpunit.cache
+
+coverage
+**/coverage
+
+
+# ============================================================
+# 9. PYTHON CACHE
+# ============================================================
+
+**/__pycache__
+**/*.pyc
+**/*.pyo
+
+
+# ============================================================
+# 10. LOCAL BUILD ARTIFACTS
+# ============================================================
+
+dist
+**/dist
+
+.npm
+**/.npm
+
+.cache
+**/.cache
+
+
+# ============================================================
+# 11. DOCKER BUILD METADATA
+# ============================================================
+
 Dockerfile
+**/Dockerfile
+
+docker-compose.yml
+docker-compose.*.yml
+
+.dockerignore
+
+
+# ============================================================
+# END OF ACADEMY DOCKERIGNORE
+# ============================================================
