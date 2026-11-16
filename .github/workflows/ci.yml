@@ -1,4 +1,4 @@
-name: Academy CI
+name: Academy CI/CD
 
 on:
   push:
@@ -102,12 +102,20 @@ jobs:
           exit-code: '1'
 
   docker-image:
-    name: Docker Image Build / Security Scan
+    name: Docker Image Build / Security Scan / GHCR Publish
     runs-on: ubuntu-latest
     timeout-minutes: 45
     needs:
       - php-quality
       - frontend
+      - repository-security
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.publish.outputs.image }}
+    env:
+      IMAGE_NAME: ghcr.io/figo05-ai/academy
 
     steps:
       - name: Checkout source
@@ -117,9 +125,10 @@ jobs:
 
       - name: Build application image
         run: |
-          docker build \
+          docker build --pull \
             --file docker/app/Dockerfile \
             --tag academy-app:ci \
+            --tag "$IMAGE_NAME:sha-$GITHUB_SHA" \
             .
 
       - name: Scan application image
@@ -132,3 +141,86 @@ jobs:
           ignore-unfixed: false
           format: table
           exit-code: '1'
+
+      - name: Publish image and capture its immutable digest
+        id: publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io \
+            --username "$GITHUB_ACTOR" \
+            --password-stdin
+          PUSH_OUTPUT="$(docker push "$IMAGE_NAME:sha-$GITHUB_SHA")"
+          DIGEST="$(printf '%s\n' "$PUSH_OUTPUT" | sed -nE 's/.*digest: (sha256:[0-9a-f]{64}).*/\1/p' | tail -1)"
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo 'No image digest returned from docker push'; exit 1; }
+          echo "image=$IMAGE_NAME@$DIGEST" >> "$GITHUB_OUTPUT"
+          printf 'Published verified image digest: %s@%s\n' "$IMAGE_NAME" "$DIGEST"
+
+  deploy-production:
+    name: Deploy to Contabo Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - docker-image
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CONTABO_DEPLOY_ENABLED == 'true' }}
+    permissions:
+      contents: read
+      packages: read
+    concurrency:
+      group: academy-contabo-production
+      cancel-in-progress: false
+    env:
+      DEPLOY_IMAGE: ${{ needs.docker-image.outputs.image }}
+      CONTABO_HOST: ${{ secrets.CONTABO_HOST }}
+      CONTABO_USERNAME: ${{ secrets.CONTABO_USERNAME }}
+      CONTABO_SSH_PORT: ${{ secrets.CONTABO_SSH_PORT }}
+      CONTABO_SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
+      CONTABO_KNOWN_HOSTS: ${{ secrets.CONTABO_KNOWN_HOSTS }}
+
+    steps:
+      - name: Validate Contabo deployment secrets
+        run: |
+          set -Eeuo pipefail
+          : "${CONTABO_HOST:?Missing CONTABO_HOST repository secret}"
+          : "${CONTABO_USERNAME:?Missing CONTABO_USERNAME repository secret}"
+          : "${CONTABO_SSH_KEY:?Missing CONTABO_SSH_KEY repository secret}"
+          : "${CONTABO_KNOWN_HOSTS:?Missing CONTABO_KNOWN_HOSTS repository secret}"
+          echo "Contabo deployment settings are present."
+
+      - name: Configure pinned SSH identity
+        run: |
+          set -Eeuo pipefail
+          install -m 0700 -d "$HOME/.ssh"
+          KEY_FILE="$RUNNER_TEMP/academy-contabo-deploy-key"
+          printf '%s\n' "$CONTABO_SSH_KEY" > "$KEY_FILE"
+          chmod 0600 "$KEY_FILE"
+          printf '%s\n' "$CONTABO_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$KEY_FILE" >/dev/null
+          echo "ACADEMY_DEPLOY_KEY=$KEY_FILE" >> "$GITHUB_ENV"
+
+      - name: Deploy immutable image and verify production
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${CONTABO_SSH_PORT:-22}"
+          IMAGE="$DEPLOY_IMAGE"
+          [[ "$IMAGE" =~ ^ghcr\.io/figo05-ai/academy@sha256:[0-9a-f]{64}$ ]] || exit 1
+
+          printf '%s\n%s\n%s\n' \
+            "$IMAGE" \
+            "$GITHUB_ACTOR" \
+            "$GHCR_TOKEN" \
+          | ssh -T \
+              -i "$ACADEMY_DEPLOY_KEY" \
+              -p "$PORT" \
+              -o BatchMode=yes \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+              -o ConnectTimeout=20 \
+              "$CONTABO_USERNAME@$CONTABO_HOST" \
+              'sudo -n /usr/local/sbin/academy-deploy.sh'

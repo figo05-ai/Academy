@@ -1,0 +1,64 @@
+# REVIEW-ONLY Contabo production reference. DO NOT point GitHub Actions at this file.
+# Live source of truth: /opt/academy/deployment/docker-compose.launch.yml (root-owned).
+# The MySQL 8.4 database is managed separately by mysql.bootstrap.yml on the VPS.
+# No Compose down/up of the whole stack as part of app deployments.
+services:
+  app:
+    image: ${ACADEMY_IMAGE:-academy-app:contabo-v2}
+    container_name: academy_app_production
+    restart: unless-stopped
+    volumes:
+      - /opt/academy/secrets/laravel.production.env:/var/www/.env:ro
+      - /opt/academy/app/storage-public:/var/www/storage/app/public
+      - academy_public:/var/www/public:ro
+    networks: [academy_network]
+
+  nginx:
+    image: nginx:alpine
+    container_name: academy_nginx_production
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - academy_public:/var/www/public:ro
+      - /opt/academy/app/storage-public:/var/www/storage/app/public:ro
+      - /opt/academy/deployment/nginx.launch.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/academy/deployment/nginx.legacy.conf:/etc/nginx/conf.d/legacy.conf:ro
+      - /var/lib/letsencrypt:/var/www/letsencrypt:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on: [app]
+    networks: [academy_network]
+
+  redis_prod:
+    image: redis:alpine
+    container_name: academy_redis_production
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_prod_data:/data
+    networks: [academy_network]
+
+  worker:
+    image: ${ACADEMY_IMAGE:-academy-app:contabo-v2}
+    container_name: academy_worker_production
+    restart: unless-stopped
+    profiles: [cutover]
+    working_dir: /var/www
+    command: ["php", "artisan", "queue:work", "--verbose", "--tries=3", "--timeout=90"]
+    volumes:
+      - /opt/academy/secrets/laravel.production.env:/var/www/.env:ro
+      - /opt/academy/app/storage-public:/var/www/storage/app/public
+    networks: [academy_network]
+
+volumes:
+  academy_public:
+    external: true
+    name: academy_shared_public
+  redis_prod_data:
+    external: true
+    name: academy-production_redis_prod_data
+networks:
+  academy_network:
+    external: true
+    name: academy_default

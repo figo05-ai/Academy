@@ -1,75 +1,72 @@
+# Local development only. Never use this file to deploy the Contabo VPS.
+# Use a local, untracked .env; no real credentials belong in Git.
+name: academy-local
 services:
   app:
     build:
       context: .
       dockerfile: docker/app/Dockerfile
-    container_name: academy_app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
       - ./:/var/www
-    networks:
-      - academy_network
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [academy_dev]
 
   nginx:
     image: nginx:alpine
-    container_name: academy_nginx
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "127.0.0.1:8080:80"
     volumes:
-      - ./:/var/www
-      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - app
-    networks:
-      - academy_network
+      - ./:/var/www:ro
+      - ./docker/nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [app]
+    networks: [academy_dev]
 
   db:
-    image: mysql:8.0
-    container_name: academy_db
+    image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_DATABASE: ${DB_DATABASE:?Set DB_DATABASE in local .env}
+      MYSQL_USER: ${DB_USERNAME:?Set DB_USERNAME in local .env (not root)}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in local .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set a distinct local MYSQL_ROOT_PASSWORD}
     volumes:
-      - academy_db_data:/var/lib/mysql
-    networks:
-      - academy_network
+      - academy_db_dev_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysqladmin ping -h 127.0.0.1 -u root --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks: [academy_dev]
 
   redis:
     image: redis:alpine
-    container_name: academy_redis
     restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      - academy_redis_data:/data
-    networks:
-      - academy_network
+      - academy_redis_dev_data:/data
+    networks: [academy_dev]
 
   worker:
     build:
       context: .
       dockerfile: docker/app/Dockerfile
-    container_name: academy_worker
     restart: unless-stopped
-    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    working_dir: /var/www
+    command: ["php", "artisan", "queue:work", "--verbose", "--tries=3", "--timeout=90"]
     volumes:
       - ./:/var/www
     depends_on:
-      - redis
-    networks:
-      - academy_network
+      db:
+        condition: service_healthy
+    networks: [academy_dev]
 
 networks:
-  academy_network:
-    driver: bridge
-
+  academy_dev: {}
 volumes:
-  academy_db_data:
-    driver: local
-  academy_redis_data:
-    driver: local
+  academy_db_dev_data: {}
+  academy_redis_dev_data: {}

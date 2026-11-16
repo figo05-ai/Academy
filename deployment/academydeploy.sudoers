@@ -1,0 +1,2 @@
+# The empty string limits this privileged command to zero CLI arguments.
+academydeploy ALL=(root) NOPASSWD: /usr/local/sbin/academy-deploy.sh ""
