@@ -14,8 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev libwebp-dev libxml2-dev libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" \
-       bcmath dom exif gd intl mbstring opcache pcntl pdo_mysql \
-       simplexml xml xmlreader xmlwriter zip \
+       bcmath exif gd intl mbstring opcache pcntl pdo_mysql zip \
     && pecl install redis-6.2.0 \
     && docker-php-ext-enable redis \
     && rm -rf /tmp/pear /var/lib/apt/lists/*
