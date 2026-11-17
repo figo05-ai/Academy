@@ -1,187 +1,84 @@
-# ============================================================
-# ACADEMY - DOCKER BUILD CONTEXT SECURITY
-# Laravel 13 | PHP 8.3 | Contabo Infrastructure
-# ============================================================
-
-
-# ============================================================
-# 1. VERSION CONTROL AND CI/CD
-# ============================================================
-
+# Never bake secrets, deployment state, backups or local user uploads into an image.
 .git
 .github
 .gitignore
-
-**/.git
-**/.github
-
-
-# ============================================================
-# 2. DEVELOPMENT ENVIRONMENTS AND IDE FILES
-# ============================================================
-
-.idea
+.dockerignore
 .vscode
-.cursor
-.codex
-.nova
-.zed
-
-**/.idea
-**/.vscode
-**/.cursor
-
-.DS_Store
-Thumbs.db
-
-**/.DS_Store
-**/Thumbs.db
-
-
-# ============================================================
-# 3. ENVIRONMENT FILES AND SECRETS
-# ============================================================
-
+.idea
 .env
 .env.*
 **/.env
 **/.env.*
-
 !.env.example
 !**/.env.example
-
 **/.aws
 **/.ssh
 **/.secrets
-
 **/secrets
 **/secrets/**
-
 **/auth.json
-
+**/id_rsa
+**/id_ed25519
 **/*.pem
 **/*.key
 **/*.p12
 **/*.pfx
 
-**/id_rsa
-**/id_ed25519
-
-
-# ============================================================
-# 4. DEPENDENCIES
-# ============================================================
-
+# Dependencies are installed as part of the Docker build, not copied from the host.
 vendor
-node_modules
-
 **/vendor
+node_modules
 **/node_modules
 
-
-# ============================================================
-# 5. FRONTEND GENERATED FILES
-# ============================================================
-
+# Persistent host uploads and public volume content are not part of the app image.
+storage-public
+storage-public/**
+**/storage-public
+**/storage-public/**
 public/build
 public/hot
 public/storage
-
 **/public/build
-**/public/hot
 **/public/storage
-
-
-# ============================================================
-# 6. LARAVEL RUNTIME FILES
-# ============================================================
-
 storage/framework
 storage/logs
 storage/pail
-
-**/storage/framework
-**/storage/framework/**
 **/storage/logs
 **/storage/logs/**
-**/storage/pail
-**/storage/pail/**
-
+**/storage/framework
+**/storage/framework/**
 bootstrap/cache/*.php
 
-
-# ============================================================
-# 7. DATABASE DUMPS AND BACKUPS
-# ============================================================
-
+# Backup/data files.
 backups
 **/backups
 **/backups/**
-
 **/*.sql
 **/*.sql.gz
 **/*.dump
 **/*.sqlite
-**/*.sqlite3
 **/*.db
-
-
-# ============================================================
-# 8. TEMPORARY FILES AND LOGS
-# ============================================================
-
 **/*.log
 **/*.tmp
-**/*.temp
 **/*.swp
-**/*.swo
 **/*~
+**/*.tar.gz.gpg
+**/*.age
+**/*.gpg
 
-.phpunit.cache
-.phpunit.result.cache
-
-**/.phpunit.cache
-
-coverage
-**/coverage
-
-
-# ============================================================
-# 9. PYTHON CACHE
-# ============================================================
-
-**/__pycache__
-**/*.pyc
-**/*.pyo
-
-
-# ============================================================
-# 10. LOCAL BUILD ARTIFACTS
-# ============================================================
-
-dist
-**/dist
-
-.npm
-**/.npm
-
-.cache
-**/.cache
-
-
-# ============================================================
-# 11. DOCKER BUILD METADATA
-# ============================================================
-
-Dockerfile
-**/Dockerfile
-
+# Files not needed in build contexts.
 docker-compose.yml
 docker-compose.*.yml
+**/Dockerfile
+Dockerfile
+dist
+**/dist
+coverage
+**/coverage
+**/__pycache__
+**/*.pyc
 
-.dockerignore
-
-
-# ============================================================
-# END OF ACADEMY DOCKERIGNORE
-# ============================================================
+storage/app/public
+storage/app/public/**
+storage/app/private
+storage/app/private/**

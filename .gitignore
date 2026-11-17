@@ -296,3 +296,8 @@ docker-compose.dev.local.yml
 # ============================================================
 # END OF ACADEMY GITIGNORE
 # ============================================================
+
+/storage-public/*
+!/storage-public/.gitignore
+/storage/app/public/*
+!/storage/app/public/.gitignore
