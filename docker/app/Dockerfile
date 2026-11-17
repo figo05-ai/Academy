@@ -24,6 +24,19 @@ RUN apk add --no-cache \
 
 FROM php:8.3-fpm-alpine3.23 AS php-runtime
 
+# Match the existing Contabo production UID/GID.
+# Preserve access to shared public and private storage volumes.
+RUN set -eux; \
+    test "$(id -u www-data)" = "82"; \
+    test "$(id -g www-data)" = "82"; \
+    awk -F: '$3 == 33 {exit 1}' /etc/passwd; \
+    awk -F: '$3 == 33 {exit 1}' /etc/group; \
+    sed -i 's/^www-data:x:82:82:/www-data:x:33:33:/' /etc/passwd; \
+    sed -i 's/^www-data:x:82:/www-data:x:33:/' /etc/group; \
+    test "$(id -u www-data)" = "33"; \
+    test "$(id -g www-data)" = "33"
+
+
 RUN apk add --no-cache \
     freetype icu-libs libjpeg-turbo libpng libwebp libzip
 
